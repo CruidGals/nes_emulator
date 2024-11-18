@@ -375,12 +375,9 @@ void INC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
  */
 void BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
 {
-    if (test_set)
-    {
-        (*pc) += static_cast<int8_t>(opcode[1]);
-    }
-    
-    (*pc)++;
+    //Take branch if condition is matched
+    //Absolute Offset function builds targeted address from opcode
+    if (test_set) *pc = AbsoluteOffset(opcode);
 }
 
 /* ---------------- STACK INSTRUCTIONS ---------------- */
@@ -436,9 +433,6 @@ void BRK(State6502 *const state)
     
     //Load Interrupt vector into memory
     state->pc = (static_cast<uint16_t>(state->memory[0xFFFF]) << 8) | static_cast<uint16_t>(state->memory[0xFFFE]);
-    
-    //Offset PC counter (emulate() function increments PC by 1 automatically)
-    state->pc--;
 }
 
 void RTI(State6502 *const state)
@@ -464,8 +458,7 @@ void RTS(State6502 *const state)
 void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint16_t offset = *offsetByMode(state, opcode, mode);
-    state->pc = static_cast<uint16_t>(offset + 1) << 8 | static_cast<uint16_t>(offset);
-    state->pc--;
+    state->pc = (offset + 1) << 8 | offset;
 }
 
 void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
@@ -480,9 +473,8 @@ void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->memory[state->s] = static_cast<uint8_t>(state->pc);
     state->s--;
     
-    //Offset program counter
+    //Redirect program counter
     state->pc = offset;
-    state->pc--;
 }
 
 /* ---------------- FLAG INSTRUCTIONS ---------------- */
