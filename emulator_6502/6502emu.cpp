@@ -129,6 +129,9 @@ void bitwiseOpFlags(State6502 *const state, uint8_t comp)
 }
 
 //Opcode Instructions ---------------------------
+
+/* ---------------- LOGIC INSTRUCTIONS ---------------- */
+
 void ORA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode) | state->a;
@@ -152,20 +155,14 @@ void AND(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc += pcByMode(mode);
 }
 
-/*
- Shifts memory or accumulator left by one bit, with carry bit rotating into the 0th bit and the 7th bit rotating into the carry bit
- Affects carry, zero, negative bit
- */
-void ROL(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+void EOR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
-    uint8_t* offset = offsetByMode(state, opcode, mode);
-    uint16_t result = static_cast<uint16_t>(*offset) << 1 | state->ps.c;
-    *offset = static_cast<uint8_t>(result);
-    state->ps.c = 0x0100 == (result & 0x0100);
-    state->ps.z = *offset == 0x00;
-    state->ps.n = 0x80 == (*offset & 0x80);
+    state->a = *offsetByMode(state, opcode, mode) ^ state->a;
+    bitwiseOpFlags(state, state->a);
     state->pc += pcByMode(mode);
 }
+
+/* ---------------- SHIFT (BIT) INSTRUCTIONS ---------------- */
 
 void ASL(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
@@ -177,13 +174,6 @@ void ASL(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->ps.c = (0x0100 == (result & 0x0100));
     state->ps.z = *p == 0x00;
     state->ps.n = 0x80 == (*p & 0x80);
-    state->pc += pcByMode(mode);
-}
-
-void EOR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
-{
-    state->a = *offsetByMode(state, opcode, mode) ^ state->a;
-    bitwiseOpFlags(state, state->a);
     state->pc += pcByMode(mode);
 }
 
@@ -201,6 +191,40 @@ void LSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->ps.n = 0x80 == (*p & 0x80);
     state->pc += pcByMode(mode);
 }
+
+/*
+ Shifts memory or accumulator left by one bit, with carry bit rotating into the 0th bit and the 7th bit rotating into the carry bit
+ Affects carry, zero, negative bit
+ */
+void ROL(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+{
+    uint8_t* offset = offsetByMode(state, opcode, mode);
+    uint16_t result = static_cast<uint16_t>(*offset) << 1 | state->ps.c;
+    *offset = static_cast<uint8_t>(result);
+    state->ps.c = 0x0100 == (result & 0x0100);
+    state->ps.z = *offset == 0x00;
+    state->ps.n = 0x80 == (*offset & 0x80);
+    state->pc += pcByMode(mode);
+}
+
+/*
+ Shifts memory or accumulator right by one bit, with carry bit rotating into the 7th bit and the 0th bit rotating into the carry bit
+ Affects carry, zero, negative bit
+ */
+void ROR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+{
+    uint8_t* offset = offsetByMode(state, opcode, mode);
+    
+    //Set carry bit before lost by bit maneuver
+    state->ps.c = *offset & 0x01;
+    
+    *offset = *offset >> 1 | state->ps.c << 7;
+    state->ps.z = *offset == 0x00;
+    state->ps.n = 0x80 == (*offset & 0x80);
+    state->pc += pcByMode(mode);
+}
+
+/* ---------------- ARITHMETIC INSTRUCTIONS ---------------- */
 
 void ADC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
@@ -239,21 +263,22 @@ void SBC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 }
 
 /*
- Shifts memory or accumulator right by one bit, with carry bit rotating into the 7th bit and the 0th bit rotating into the carry bit
- Affects carry, zero, negative bit
+ Covers CMP, CPX, and CPY
  */
-void ROR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+void CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode, const uint8_t index)
 {
-    uint8_t* offset = offsetByMode(state, opcode, mode);
+    uint8_t offset = *offsetByMode(state, opcode, mode);
+    uint8_t result = index - offset;
     
-    //Set carry bit before lost by bit maneuver
-    state->ps.c = *offset & 0x01;
+    //Flags
+    state->ps.c = index > offset;
+    bitwiseOpFlags(state, result);
     
-    *offset = *offset >> 1 | state->ps.c << 7;
-    state->ps.z = *offset == 0x00;
-    state->ps.n = 0x80 == (*offset & 0x80);
     state->pc += pcByMode(mode);
+    
 }
+
+/* ---------------- LOAD INSTRUCTIONS ---------------- */
 
 void STA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
@@ -291,12 +316,22 @@ void LDY(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc += pcByMode(mode);
 }
 
+/* ---------------- TRANSFER INSTRUCTIONS ---------------- */
 
+/*
+ Transfer values from one variable to another.
+ Covers transfer instructions TAX, TAY, TSX, TXA, TXS. TYA
+ */
 void TRANSFER(State6502 *const state, const uint8_t value, uint8_t *const var, const bool affect_flags = true)
 {
+    //Transfer value to variable
     *var = value;
+    
+    //Only TXS doesn't affect flags
     if (affect_flags) bitwiseOpFlags(state, *var);
 }
+
+/* ---------------- INCREMENT/DECREMENT INSTRUCTIONS ---------------- */
 
 /*
  Covers decrements instructions DEY and DEX
@@ -332,22 +367,12 @@ void INC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc += pcByMode(mode);
 }
 
-/*
- Covers CMP, CPX, and CPY
- */
-void CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode, const uint8_t index)
-{
-    uint8_t offset = *offsetByMode(state, opcode, mode);
-    uint8_t result = index - offset;
-    
-    //Flags
-    state->ps.c = index >= offset;
-    bitwiseOpFlags(state, result);
-    
-    state->pc += pcByMode(mode);
-    
-}
+/* ---------------- BRANCH INSTRUCTIONS ---------------- */
 
+/*
+ Condition branches (similar to if statements, but tests bits on processor status)
+ Covers BCC, BCS, BEQ, BMI, BNE, BPL, BVC, BVS instructions
+ */
 void BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
 {
     if (test_set)
@@ -357,6 +382,8 @@ void BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
     
     (*pc)++;
 }
+
+/* ---------------- STACK INSTRUCTIONS ---------------- */
 
 void PHA(State6502 *const state)
 {
@@ -387,6 +414,8 @@ void PLP(State6502 *const state)
     //Unparse Processor Status
     unparseProcessorStatus(&state->ps, status);
 }
+
+/* ---------------- CONTROL INSTRUCTIONS ---------------- */
 
 void BRK(State6502 *const state)
 {
@@ -455,6 +484,9 @@ void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc = offset;
     state->pc--;
 }
+
+/* ---------------- FLAG INSTRUCTIONS ---------------- */
+/* Already written within switch statement (one liner) */
 
 int emulate(State6502 *state)
 {
