@@ -36,5 +36,6 @@ typedef struct State6502
 } State6502;
 
 int emulate(State6502 *state);
+void disassemble(State6502 *state);
 
 #endif /* _502emu_hpp */

@@ -483,7 +483,7 @@ void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 int emulate(State6502 *state)
 {
     uint8_t *opcode = &state->memory[state->pc];
-    std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(state->pc) << std::endl;
+    //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(state->pc) << std::endl;
     state->pc += 1;
     
     switch (*opcode)
@@ -539,7 +539,7 @@ int emulate(State6502 *state)
         case 0x1e: //ASL - X-Indexed Absolute
             ASL(state, opcode, X_INDEXED_ABSOLUTE);
             break;
-        case 0x20: //JSR
+        case 0x20: //JSR - Absolute
             JSR(state, opcode, ABSOLUTE);
             break;
         case 0x21: //AND - X-Indexed Zero Page Indirect
@@ -942,11 +942,596 @@ int emulate(State6502 *state)
             break;
     }
     
-    std::cout << "A: " << static_cast<int>(state->a) << " X: " << static_cast<int>(state->x) << " Y: " << static_cast<int>(state->y) << " S: " << static_cast<int>(state->s) << std::endl;
-    std::cout << "C: " << static_cast<int>(state->ps.c) << " Z: " << static_cast<int>(state->ps.z) << " I: " << static_cast<int>(state->ps.i) << " D: " << static_cast<int>(state->ps.d) << " B: " << static_cast<int>(state->ps.b) << " V:" << static_cast<int>(state->ps.v) << " N: " << static_cast<int>(state->ps.n) << std::endl;
+    //std::cout << "A: " << static_cast<int>(state->a) << " X: " << static_cast<int>(state->x) << " Y: " << static_cast<int>(state->y) << " S: " << static_cast<int>(state->s) << std::endl;
+    //std::cout << "C: " << static_cast<int>(state->ps.c) << " Z: " << static_cast<int>(state->ps.z) << " I: " << static_cast<int>(state->ps.i) << " D: " << static_cast<int>(state->ps.d) << " B: " << static_cast<int>(state->ps.b) << " V:" << static_cast<int>(state->ps.v) << " N: " << static_cast<int>(state->ps.n) << std::endl;
     
     
     return 0;
+}
+
+void disassemble(State6502 *state)
+{
+    uint8_t *opcode = &state->memory[state->pc];
+    state->pc += 1;
+    
+    switch (*opcode)
+    {
+        case 0x00: //BRK
+            printf("%04x\tBRK\n", state->pc);
+            break;
+        case 0x01: //ORA - X-Indexed Zero Page Indirect
+            printf("%04x\tORA ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0x05: //ORA - Zero Page
+            printf("%04x\tORA $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x06: //ASL - Zero Page
+            printf("%04x\tASL $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x08: //PHP
+            printf("%04x\tPHP\n", state->pc);
+            break;
+        case 0x09: //ORA - Immediate
+            printf("%04x\tORA #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0x0a: //ASL - Accumulator
+            printf("%04x\tASL A\n", state->pc);
+            break;
+        case 0x0d: //ORA - Absolute
+            printf("%04x\tORA $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x0e: //ASL - Absolute
+            printf("%04x\tASL $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x10: //BPL
+            printf("%04x\tBPL $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0x11: //ORA - Zero Page Indirect Y-Indexed
+            printf("%04x\tORA ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0x15: //ORA - X-Indexed Zero Page
+            printf("%04x\tORA $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x16: //ASL - X-Indexed Zero Page
+            printf("%04x\tASL $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x18: //CLC
+            printf("%04x\tCLC\n", state->pc);
+            break;
+        case 0x19: //ORA - Y-Indexed Absolute
+            printf("%04x\tORA $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0x1d: //ORA - X-Indexed Absolute
+            printf("%04x\tORA $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x1e: //ASL - X-Indexed Absolute
+            printf("%04x\tASL $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x20: //JSR - Absolute
+            printf("%04x\tJSR $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x21: //AND - X-Indexed Zero Page Indirect
+            printf("%04x\tAND ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0x24: //BIT- Zero Page
+            printf("%04x\tBIT $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x25: //AND - Zero Page
+            printf("%04x\tAND $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x26: //ROL - Zero Page
+            printf("%04x\tROL $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x28: //PLP
+            printf("%04x\tPLP\n", state->pc);
+            break;
+        case 0x29: //AND - Immediate
+            printf("%04x\tAND #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0x2a: //ROL - Accumulator
+            printf("%04x\tROL A\n", state->pc);
+            break;
+        case 0x2c: //BIT - Absolute
+            printf("%04x\tBIT $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x2d: //AND - Absolute
+            printf("%04x\tAND $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x2e: //ROL - Absolute
+            printf("%04x\tROL $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x30: //BMI
+            printf("%04x\tBMI $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0x31: //AND - Zero Page Indirect Y-Indexed
+            printf("%04x\tAND ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0x35: //AND - X-Indexed Zero Page
+            printf("%04x\tAND $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x36: //ROL - X-Indexed Zero Page
+            printf("%04x\tROL $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x38: //SEC
+            printf("%04x\tSEC\n", state->pc);
+            break;
+        case 0x39: //AND - Y-Indexed Absolute
+            printf("%04x\tAND $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0x3d: //AND - X-Indexed Absolute
+            printf("%04x\tAND $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x3e: //ROL - X-Indexed Absolute
+            printf("%04x\tROL $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x40: //RTI
+            printf("%04x\tRTI\n", state->pc);
+            break;
+        case 0x41: //EOR - X-Indexed Zero Page Indirect
+            printf("%04x\tEOR ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0x45: //EOR - Zero Page
+            printf("%04x\tEOR $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x46: //LSR - Zero Page
+            printf("%04x\tLSR $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x48: //PHA
+            printf("%04x\tPHA\n", state->pc);
+            break;
+        case 0x49: //EOR - Immediate
+            printf("%04x\tEOR #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0x4a: //LSR - Accumulator
+            printf("%04x\tLSR A\n", state->pc);
+            break;
+        case 0x4c: //JMP - Absolute
+            printf("%04x\tJMP $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x4d: //EOR - Absolute
+            printf("%04x\tEOR $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x4e: //LSR - Absolute
+            printf("%04x\tLSR $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x50: //BVC
+            printf("%04x\tBVC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0x51: //EOR - Zero Page Indirect Y-Indexed
+            printf("%04x\tEOR ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0x55: //EOR - X-Indexed Zero Page
+            printf("%04x\tEOR $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x56: //LSR - X-Indexed Zero Page
+            printf("%04x\tLSR $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x58: //CLI
+            printf("%04x\tCLI\n", state->pc);
+            break;
+        case 0x59: //EOR - Y-Indexed Absolute
+            printf("%04x\tEOR $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0x5d: //EOR - X-Indexed Absolute
+            printf("%04x\tEOR $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x5e: //LSR - X-Indexed Absolute
+            printf("%04x\tLSR $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x60: //RTS
+            printf("%04x\tRTS\n", state->pc);
+            break;
+        case 0x61: //ADC - X-Indexed Zero Page Indirect
+            printf("%04x\tADC ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0x65: //ADC - Zero Page
+            printf("%04x\tADC $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x66: //ROR - Zero Page
+            printf("%04x\tROR $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x68: //PLA
+            printf("%04x\tPLA\n", state->pc);
+            break;
+        case 0x69: //ADC - Immediate
+            printf("%04x\tADC #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0x6a: //ROR - Accumulator
+            printf("%04x\tROR A\n", state->pc);
+            break;
+        case 0x6c: //JMP - Absolute Indirect
+            printf("%04x\tJMP ($%02x%02x)\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE_INDIRECT);
+            break;
+        case 0x6d: //ADC - Absolute
+            printf("%04x\tADC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x6e: //ROR - Absolute
+            printf("%04x\tROR $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x70: //BVS
+            printf("%04x\tBVS $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0x71: //ADC - Zero Page Indirect Y-Indexed
+            printf("%04x\tADC ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0x75: //ADC - X-Indexed Zero Page
+            printf("%04x\tADC $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x76: //ROR - X-Indexed Zero Page
+            printf("%04x\tROR $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x78: //SEI
+            printf("%04x\tSEI\n", state->pc);
+            break;
+        case 0x79: //ADC - Y-Indexed Absolute
+            printf("%04x\tADC $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0x7d: //ADC - X-Indexed Absolute
+            printf("%04x\tADC $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x7e: //ROR - X-Indexed Absolute
+            printf("%04x\tROR $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0x81: //STA - X-Indexed Zero Page Indirect
+            printf("%04x\tSTA ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0x84: //STY - Zero Page
+            printf("%04x\tSTY $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x85: //STA - Zero Page
+            printf("%04x\tSTA $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x86: //STX - Zero Page
+            printf("%04x\tSTX $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0x88: //DEY - Implied
+            printf("%04x\tDEY\n", state->pc);
+            break;
+        case 0x8a: //TXA - Implied
+            printf("%04x\tTXA\n", state->pc);
+            break;
+        case 0x8c: //STY - Absolute
+            printf("%04x\tSTY $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x8d: //STA - Absolute
+            printf("%04x\tSTA $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x8e: //STX - Absolute
+            printf("%04x\tSTX $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0x90: //BCC - Relative
+            printf("%04x\tBCC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0x91: //STA - Zero Page Indirect Y-Indexed
+            printf("%04x\tSTA ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0x94: //STY - X-Indexed Zero Page
+            printf("%04x\tSTY $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x95: //STA - X-Indexed Zero Page
+            printf("%04x\tSTA $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0x96: //STX - Y-Indexed Zero Page
+            printf("%04x\tSTX $%02x,Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ZERO_PAGE);
+            break;
+        case 0x98: //TYA - Implied
+            printf("%04x\tTYA\n", state->pc);
+            break;
+        case 0x99: //STA - Y-Indexed Absolute
+            printf("%04x\tSTA $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0x9a: //TXS - Implied
+            printf("%04x\tTXS\n", state->pc);
+            break;
+        case 0x9d: //STA - X-Indexed Absolute
+            printf("%04x\tSTA $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xa0: //LDY - Immediate
+            printf("%04x\tLDY #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xa1: //LDA - X-Indexed Zero Page Indirect
+            printf("%04x\tLDA ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0xa2: //LDX - Immediate
+            printf("%04x\tLDX #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xa4: //LDY - Zero Page
+            printf("%04x\tLDY $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xa5: //LDA - Zero Page
+            printf("%04x\tLDA $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xa6: //LDX - Zero Page
+            printf("%04x\tLDX $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xa8: //TAY
+            printf("%04x\tTAY\n", state->pc);
+            break;
+        case 0xa9: //LDA - Immediate
+            printf("%04x\tLDA #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xaa: //TAX
+            printf("%04x\tTAX\n", state->pc);
+            break;
+        case 0xac: //LDY - Absolute
+            printf("%04x\tLDY $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xad: //LDA - Absolute
+            printf("%04x\tLDA $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xae: //LDX - Absolute
+            printf("%04x\tLDX $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xb0: //BCS - Relative
+            printf("%04x\tBCS $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0xb1: //LDA - Zero Page Indirect Y-Indexed
+            printf("%04x\tLDA ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0xb4: //LDY - X-Indexed Zero Page
+            printf("%04x\tLDY $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xb5: //LDA - X-Indexed Zero Page
+            printf("%04x\tLDA $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xb6: //LDX - Y-Indexed Zero Page
+            printf("%04x\tLDX $%02x,Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ZERO_PAGE);
+            break;
+        case 0xb8: //CLV
+            printf("%04x\tCLV\n", state->pc);
+            break;
+        case 0xb9: //LDA - Y-Indexed Absolute
+            printf("%04x\tLDA $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0xba: //TSX
+            printf("%04x\tTSX\n", state->pc);
+            break;
+        case 0xbc: //LDY - X-Indexed Absolute
+            printf("%04x\tLDY $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xbd: //LDA - X-Indexed Absolute
+            printf("%04x\tLDA $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xbe: //LDX - Y-Indexed Absolute
+            printf("%04x\tLDX $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0xc0: //CPY - Immediate
+            printf("%04x\tCPY #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xc1: //CMP - X-Indexed Zero Page Indirect
+            printf("%04x\tCMP ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0xc4: //CPY - Zero Page
+            printf("%04x\tCPY $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xc5: //CMP - Zero Page
+            printf("%04x\tCMP $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xc6: //DEC - Zero Page
+            printf("%04x\tDEC $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xc8: //INY - Implied
+            printf("%04x\tINY\n", state->pc);
+            break;
+        case 0xc9: //CMP - Immediate
+            printf("%04x\tCMP #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xca: //DEX - Implied
+            printf("%04x\tDEX\n", state->pc);
+            break;
+        case 0xcc: //CPY - Absolute
+            printf("%04x\tCPY $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xcd: //CMP - Absolute
+            printf("%04x\tCMP $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xce: //DEC - Absolute
+            printf("%04x\tDEC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xd0: //BNE - Relative
+            printf("%04x\tBNE $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0xd1: //CMP - Zero Page Indirect Y-Indexed
+            printf("%04x\tCMP ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0xd5: //CMP - X-Indexed Zero Page
+            printf("%04x\tCMP $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xd6: //DEC - X-Indexed Zero Page
+            printf("%04x\tDEC $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xd8: //CLD
+            printf("%04x\tCLD\n", state->pc);
+            break;
+        case 0xd9: //CMP - Y-Indexed Absolute
+            printf("%04x\tCMP $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0xdd: //CMP - X-Indexed Absolute
+            printf("%04x\tCMP $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xde: //DEC - X-Indexed Absolute
+            printf("%04x\tDEC $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xe0: //CPX - Immediate
+            printf("%04x\tCPX #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xe1: //SBC - X-Indexed Zero Page Indirect
+            printf("%04x\tSBC ($%02x,X)\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE_INDIRECT);
+            break;
+        case 0xe4: //CPX - Zero Page
+            printf("%04x\tCPX $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xe5: //SBC - Zero Page
+            printf("%04x\tSBC $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xe6: //INC - Zero Page
+            printf("%04x\tINC $%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE);
+            break;
+        case 0xe8: //INX
+            printf("%04x\tINX\n", state->pc);
+            break;
+        case 0xe9: //SBC - Immediate
+            printf("%04x\tSBC #%02x\n", state->pc, opcode[1]);
+            state->pc += pcByMode(IMMEDIATE);
+            break;
+        case 0xea: //NOP
+            printf("%04x\tNOP\n", state->pc);
+            break;
+        case 0xec: //CPX - Absolute
+            printf("%04x\tCPX $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xed: //SBC - Absolute
+            printf("%04x\tSBC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xee: //INC - Absolute
+            printf("%04x\tINC $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(ABSOLUTE);
+            break;
+        case 0xf0: //BEQ
+            printf("%04x\tBEQ $%02x%02x\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(RELATIVE);
+            break;
+        case 0xf1: //SBC - Zero Page Indirect Y-Indexed
+            printf("%04x\tSBC ($%02x),Y\n", state->pc, opcode[1]);
+            state->pc += pcByMode(ZERO_PAGE_INDIRECT_Y_INDEXED);
+            break;
+        case 0xf5: //SBC - X-Indexed Zero Page
+            printf("%04x\tSBC $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xf6: //INC - X-Indexed Zero Page
+            printf("%04x\tINC $%02x,X\n", state->pc, opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ZERO_PAGE);
+            break;
+        case 0xf8: //SED
+            printf("%04x\tSED\n", state->pc);
+            break;
+        case 0xf9: //SBC - Y-Indexed Absolute
+            printf("%04x\tSBC $%02x%02x,Y\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(Y_INDEXED_ABSOLUTE);
+            break;
+        case 0xfd: //SBC - X-Indexed Absolute
+            printf("%04x\tSBC $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+        case 0xfe: //INC - X-Indexed Absolute
+            printf("%04x\tINC $%02x%02x,X\n", state->pc, opcode[2], opcode[1]);
+            state->pc += pcByMode(X_INDEXED_ABSOLUTE);
+            break;
+    }
 }
 
 
