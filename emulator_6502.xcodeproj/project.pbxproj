@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		27114B222CED36BC008B30D1 /* PPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27114B202CED36BC008B30D1 /* PPU.cpp */; };
 		27F3A9DE2CC01D5700929760 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9DD2CC01D5700929760 /* main.cpp */; };
 		27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9E42CC01F4C00929760 /* 6502emu.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		27114B202CED36BC008B30D1 /* PPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PPU.cpp; sourceTree = "<group>"; };
+		27114B212CED36BC008B30D1 /* PPU.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PPU.hpp; sourceTree = "<group>"; };
+		27114B252CEEC7F8008B30D1 /* Donkey Kong (Japan).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (Japan).nes"; sourceTree = "<group>"; };
 		27F3A9DA2CC01D5700929760 /* emulator_6502 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = emulator_6502; sourceTree = BUILT_PRODUCTS_DIR; };
 		27F3A9DD2CC01D5700929760 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		27F3A9E42CC01F4C00929760 /* 6502emu.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 6502emu.cpp; sourceTree = "<group>"; };
@@ -41,6 +45,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		27114B232CEEC620008B30D1 /* roms */ = {
+			isa = PBXGroup;
+			children = (
+				27114B252CEEC7F8008B30D1 /* Donkey Kong (Japan).nes */,
+			);
+			path = roms;
+			sourceTree = "<group>";
+		};
 		27F3A9D12CC01D5700929760 = {
 			isa = PBXGroup;
 			children = (
@@ -60,6 +72,9 @@
 		27F3A9DC2CC01D5700929760 /* emulator_6502 */ = {
 			isa = PBXGroup;
 			children = (
+				27114B232CEEC620008B30D1 /* roms */,
+				27114B212CED36BC008B30D1 /* PPU.hpp */,
+				27114B202CED36BC008B30D1 /* PPU.cpp */,
 				27F3A9DD2CC01D5700929760 /* main.cpp */,
 				27F3A9E42CC01F4C00929760 /* 6502emu.cpp */,
 				27F3A9E52CC01F4C00929760 /* 6502emu.hpp */,
@@ -124,6 +139,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27114B222CED36BC008B30D1 /* PPU.cpp in Sources */,
 				27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */,
 				27F3A9DE2CC01D5700929760 /* main.cpp in Sources */,
 			);
