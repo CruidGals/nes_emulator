@@ -39,7 +39,7 @@ uint16_t AbsoluteOffset(const uint8_t *const opcode, const uint8_t index = 0)
 //Returns Zero-Page offset for Absolute Addressing Mode; index is used if X or Y indexed
 uint16_t ZPOffset(const uint8_t *const opcode, const uint8_t index = 0)
 {
-    return static_cast<uint16_t>(opcode[1]) + index;
+    return static_cast<uint16_t>(opcode[1] + index);
 }
 
 //Returns memory offset for X-Indexed Zero Page Indirect Addressing Mode
@@ -109,6 +109,32 @@ static uint8_t parseProcessorStatus(const ProcessorStatus *const ps)
     return ((ps->n << 7) | (ps->v << 6) | (ps->b << 4) | (ps->d << 3) | (ps->i << 2) | (ps->z << 1) | ps->c);
 }
 
+int detectPageCross(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+{
+    uint8_t prev_high = opcode[2];
+    uint8_t new_high;
+    
+    switch (mode)
+    {
+        case X_INDEXED_ABSOLUTE:
+            //Get high bit of new address
+            new_high = static_cast<uint8_t>(AbsoluteOffset(opcode, state->x) >> 8);
+            break;
+        case Y_INDEXED_ABSOLUTE:
+            //Get high bit of new address
+            new_high = static_cast<uint8_t>(AbsoluteOffset(opcode, state->y) >> 8);
+            break;
+        case ZERO_PAGE_INDIRECT_Y_INDEXED:
+            prev_high = static_cast<uint8_t>((static_cast<uint16_t>(state->memory[opcode[1] + 1] << 8) | static_cast<uint16_t>(state->memory[opcode[1]])) >> 8);
+            new_high = static_cast<uint8_t>(YIndexZPIndirectOffset(state, opcode) >> 8);
+            break;
+        default:
+            return 0;
+    }
+    
+    return prev_high != new_high;
+}
+
 static void unparseProcessorStatus(ProcessorStatus *const ps, const uint8_t status)
 {
     ps->n = (status & 0x80) > 0;
@@ -132,11 +158,14 @@ void bitwiseOpFlags(State6502 *const state, uint8_t comp)
 
 /* ---------------- LOGIC INSTRUCTIONS ---------------- */
 
-void ORA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int ORA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode) | state->a;
     bitwiseOpFlags(state, state->a);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
 void BIT(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
@@ -148,18 +177,24 @@ void BIT(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc += pcByMode(mode);
 }
 
-void AND(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int AND(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode) & state->a;
     bitwiseOpFlags(state, state->a);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
-void EOR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int EOR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode) ^ state->a;
     bitwiseOpFlags(state, state->a);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
 /* ---------------- SHIFT (BIT) INSTRUCTIONS ---------------- */
@@ -226,7 +261,8 @@ void ROR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 
 /* ---------------- ARITHMETIC INSTRUCTIONS ---------------- */
 
-void ADC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int ADC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t offset = *offsetByMode(state, opcode, mode);
     uint16_t result = static_cast<uint16_t>(state->a) + static_cast<uint16_t>(offset) + state->ps.c;
@@ -242,9 +278,12 @@ void ADC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->ps.n = 0x80 == (state->a & 0x80);
     
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
-void SBC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int SBC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t offset = *offsetByMode(state, opcode, mode);
     uint16_t result = static_cast<uint16_t>(state->a) - static_cast<uint16_t>(offset) - (1 - state->ps.c);
@@ -260,12 +299,15 @@ void SBC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->ps.n = 0x80 == (state->a & 0x80);
     
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
 /*
  Covers CMP, CPX, and CPY
+ Returns extra cycle if page crossing detected
  */
-void CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode, const uint8_t index)
+int CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode, const uint8_t index)
 {
     uint8_t offset = *offsetByMode(state, opcode, mode);
     uint8_t result = index - offset;
@@ -276,6 +318,7 @@ void CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMo
     
     state->pc += pcByMode(mode);
     
+    return detectPageCross(state, opcode, mode);
 }
 
 /* ---------------- LOAD INSTRUCTIONS ---------------- */
@@ -298,22 +341,31 @@ void STY(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     state->pc += pcByMode(mode);
 }
 
-void LDA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int LDA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
-void LDX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int LDX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->x = *offsetByMode(state, opcode, mode);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
-void LDY(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
+//Returns extra cycle if page crossing detected
+int LDY(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->y = *offsetByMode(state, opcode, mode);
     state->pc += pcByMode(mode);
+    
+    return detectPageCross(state, opcode, mode);
 }
 
 /* ---------------- TRANSFER INSTRUCTIONS ---------------- */
@@ -371,13 +423,29 @@ void INC(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 
 /*
  Condition branches (similar to if statements, but tests bits on processor status)
+ Returns extra number of cycles if page crossed or branch is taken
  Covers BCC, BCS, BEQ, BMI, BNE, BPL, BVC, BVS instructions
  */
-void BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
+int BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
 {
-    //Take branch if condition is matched
-    //Absolute Offset function builds targeted address from opcode
-    if (test_set) *pc = AbsoluteOffset(opcode);
+    int cycles = 0;
+    
+    if (test_set)
+    {
+        //Used to handle page crossing cycle increment
+        const uint8_t prev_high = static_cast<uint8_t>(*pc >> 8);
+        
+        //Branch taken
+        ++cycles;
+        *pc = AbsoluteOffset(opcode);
+        
+        const uint8_t new_high = static_cast<uint8_t>(*pc >> 8);
+        
+        //New pc high bytes don't match, means page crossed
+        if (prev_high != new_high) ++cycles;
+    }
+    
+    return cycles;
 }
 
 /* ---------------- STACK INSTRUCTIONS ---------------- */
@@ -486,6 +554,28 @@ int emulate(State6502 *state)
     //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(state->pc) << std::endl;
     state->pc += 1;
     
+    //Instruction cycles given no page is crossed or branch is taken, as those events increase cycles by one
+    constexpr int base_cycles[] = { 
+        7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 0, 4, 6, 0, //0x00 - 0x0f
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0x10 - 0x1f
+        6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 0, 4, 4, 6, 0, //0x20 - 0x2f
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0x30 - 0x3f
+        6, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 3, 4, 6, 0, //0x40 - 0x4f
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0x50 - 0x5f
+        6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, //0x60 - 0x6f
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0x70 - 0x7f
+        0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, //0x80 - 0x8f
+        2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, //0x90 - 0x9f
+        2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, //0xa0 - 0xaf
+        2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, //0xb0 - 0xbf
+        2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, //0xc0 - 0xcf
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0xd0 - 0xdf
+        2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, //0xe0 - 0xef
+        2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, //0xf0 - 0xff
+    };
+    
+    int cycles = base_cycles[*opcode];
+    
     switch (*opcode)
     {
         case 0x00: //BRK
@@ -516,10 +606,10 @@ int emulate(State6502 *state)
             ASL(state, opcode, ABSOLUTE);
             break;
         case 0x10: //BPL
-            BRANCH(&state->pc, opcode, state->ps.n == 0);
+            cycles += BRANCH(&state->pc, opcode, state->ps.n == 0);
             break;
         case 0x11: //ORA - Zero Page Indirect Y-Indexed
-            ORA(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += ORA(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0x15: //ORA - X-Indexed Zero Page
             ORA(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -531,10 +621,10 @@ int emulate(State6502 *state)
             state->ps.c = 0;
             break;
         case 0x19: //ORA - Y-Indexed Absolute
-            ORA(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += ORA(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0x1d: //ORA - X-Indexed Absolute
-            ORA(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += ORA(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0x1e: //ASL - X-Indexed Absolute
             ASL(state, opcode, X_INDEXED_ABSOLUTE);
@@ -573,10 +663,10 @@ int emulate(State6502 *state)
             ROL(state, opcode, ABSOLUTE);
             break;
         case 0x30: //BMI
-            BRANCH(&state->pc, opcode, state->ps.n == 1);
+            cycles += BRANCH(&state->pc, opcode, state->ps.n == 1);
             break;
         case 0x31: //AND - Zero Page Indirect Y-Indexed
-            AND(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += AND(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0x35: //AND - X-Indexed Zero Page
             AND(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -588,10 +678,10 @@ int emulate(State6502 *state)
             state->ps.c = 1;
             break;
         case 0x39: //AND - Y-Indexed Absolute
-            AND(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += AND(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0x3d: //AND - X-Indexed Absolute
-            AND(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += AND(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0x3e: //ROL - X-Indexed Absolute
             ROL(state, opcode, X_INDEXED_ABSOLUTE);
@@ -627,10 +717,10 @@ int emulate(State6502 *state)
             LSR(state, opcode, ABSOLUTE);
             break;
         case 0x50: //BVC
-            BRANCH(&state->pc, opcode, state->ps.v == 0);
+            cycles += BRANCH(&state->pc, opcode, state->ps.v == 0);
             break;
         case 0x51: //EOR - Zero Page Indirect Y-Indexed
-            EOR(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += EOR(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0x55: //EOR - X-Indexed Zero Page
             EOR(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -642,10 +732,10 @@ int emulate(State6502 *state)
             state->ps.i = 0;
             break;
         case 0x59: //EOR - Y-Indexed Absolute
-            EOR(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += EOR(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0x5d: //EOR - X-Indexed Absolute
-            EOR(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += EOR(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0x5e: //LSR - X-Indexed Absolute
             LSR(state, opcode, X_INDEXED_ABSOLUTE);
@@ -681,10 +771,10 @@ int emulate(State6502 *state)
             ROR(state, opcode, ABSOLUTE);
             break;
         case 0x70: //BVS
-            BRANCH(&state->pc, opcode, state->ps.v == 1);
+            cycles += BRANCH(&state->pc, opcode, state->ps.v == 1);
             break;
         case 0x71: //ADC - Zero Page Indirect Y-Indexed
-            ADC(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += ADC(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0x75: //ADC - X-Indexed Zero Page
             ADC(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -696,10 +786,10 @@ int emulate(State6502 *state)
             state->ps.i = 1;
             break;
         case 0x79: //ADC - Y-Indexed Absolute
-            ADC(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += ADC(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0x7d: //ADC - X-Indexed Absolute
-            ADC(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += ADC(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0x7e: //ROR - X-Indexed Absolute
             ROR(state, opcode, X_INDEXED_ABSOLUTE);
@@ -732,7 +822,7 @@ int emulate(State6502 *state)
             STX(state, opcode, ABSOLUTE);
             break;
         case 0x90: //BCC - Relative
-            BRANCH(&state->pc, opcode, state->ps.c == 0);
+            cycles += BRANCH(&state->pc, opcode, state->ps.c == 0);
             break;
         case 0x91: //STA - Zero Page Indirect Y-Indexed
             STA(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
@@ -795,10 +885,10 @@ int emulate(State6502 *state)
             LDX(state, opcode, ABSOLUTE);
             break;
         case 0xb0: //BCS - Relative
-            BRANCH(&state->pc, opcode, state->ps.c == 1);
+            cycles += BRANCH(&state->pc, opcode, state->ps.c == 1);
             break;
         case 0xb1: //LDA - Zero Page Indirect Y-Indexed
-            LDA(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += LDA(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0xb4: //LDY - X-Indexed Zero Page
             LDY(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -813,19 +903,19 @@ int emulate(State6502 *state)
             state->ps.v = 0;
             break;
         case 0xb9: //LDA - Y-Indexed Absolute
-            LDA(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += LDA(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0xba: //TSX
             TRANSFER(state, state->s, &state->x);
             break;
         case 0xbc: //LDY - X-Indexed Absolute
-            LDY(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += LDY(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0xbd: //LDA - X-Indexed Absolute
-            LDA(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += LDA(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0xbe: //LDX - Y-Indexed Absolute
-            LDX(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += LDX(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0xc0: //CPY - Immediate
             CMP_INDEX(state, opcode, IMMEDIATE, state->y);
@@ -861,10 +951,10 @@ int emulate(State6502 *state)
             DEC(state, opcode, ABSOLUTE);
             break;
         case 0xd0: //BNE
-            BRANCH(&state->pc, opcode, state->ps.z == 0);
+            cycles += BRANCH(&state->pc, opcode, state->ps.z == 0);
             break;
         case 0xd1: //CMP - Zero Page Indirect Y-Indexed
-            CMP_INDEX(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED, state->a);
+            cycles += CMP_INDEX(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED, state->a);
             break;
         case 0xd5: //CMP - X-Indexed Zero Page
             CMP_INDEX(state, opcode, X_INDEXED_ZERO_PAGE, state->a);
@@ -876,10 +966,10 @@ int emulate(State6502 *state)
             state->ps.d = 0;
             break;
         case 0xd9: //CMP - Y-Indexed Absolute
-            CMP_INDEX(state, opcode, Y_INDEXED_ABSOLUTE, state->a);
+            cycles += CMP_INDEX(state, opcode, Y_INDEXED_ABSOLUTE, state->a);
             break;
         case 0xdd: //CMP - X-Indexed Absolute
-            CMP_INDEX(state, opcode, X_INDEXED_ABSOLUTE, state->a);
+            cycles += CMP_INDEX(state, opcode, X_INDEXED_ABSOLUTE, state->a);
             break;
         case 0xde: //DEC - X-Indexed Absolute
             DEC(state, opcode, X_INDEXED_ABSOLUTE);
@@ -917,10 +1007,10 @@ int emulate(State6502 *state)
             INC(state, opcode, ABSOLUTE);
             break;
         case 0xf0: //BEQ
-            BRANCH(&state->pc, opcode, state->ps.z == 1);
+            cycles += BRANCH(&state->pc, opcode, state->ps.z == 1);
             break;
         case 0xf1: //SBC - Zero Page Indirect Y-Indexed
-            SBC(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
+            cycles += SBC(state, opcode, ZERO_PAGE_INDIRECT_Y_INDEXED);
             break;
         case 0xf5: //SBC - X-Indexed Zero Page
             SBC(state, opcode, X_INDEXED_ZERO_PAGE);
@@ -932,10 +1022,10 @@ int emulate(State6502 *state)
             state->ps.d = 1;
             break;
         case 0xf9: //SBC - Y-Indexed Absolute
-            SBC(state, opcode, Y_INDEXED_ABSOLUTE);
+            cycles += SBC(state, opcode, Y_INDEXED_ABSOLUTE);
             break;
         case 0xfd: //SBC - X-Indexed Absolute
-            SBC(state, opcode, X_INDEXED_ABSOLUTE);
+            cycles += SBC(state, opcode, X_INDEXED_ABSOLUTE);
             break;
         case 0xfe: //INC - X-Indexed Absolute
             INC(state, opcode, X_INDEXED_ABSOLUTE);
