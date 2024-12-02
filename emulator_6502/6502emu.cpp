@@ -79,8 +79,7 @@ uint8_t* offsetByMode(State6502 *const state, uint8_t *const opcode, const Addre
         case Y_INDEXED_ZERO_PAGE: return &state->memory[ZPOffset(opcode, state->y)];
         case X_INDEXED_ZERO_PAGE_INDIRECT: return &state->memory[XIndexZPIndirectOffset(state, opcode)];
         case ZERO_PAGE_INDIRECT_Y_INDEXED: return &state->memory[YIndexZPIndirectOffset(state, opcode)];
-        case RELATIVE:
-            return nullptr;
+        case RELATIVE: return &opcode[1];
         
         default:
             return nullptr;
@@ -442,13 +441,16 @@ int BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
         
         //Branch taken
         ++cycles;
-        *pc = AbsoluteOffset(opcode);
+        *pc += static_cast<int8_t>(opcode[1]); //Turn into a signed offset
         
         const uint8_t new_high = static_cast<uint8_t>(*pc >> 8);
         
         //New pc high bytes don't match, means page crossed
         if (prev_high != new_high) ++cycles;
     }
+    
+    //Branch functions itself take 2 bytes
+    (*pc)++;
     
     return cycles;
 }
@@ -530,14 +532,16 @@ void RTS(State6502 *const state)
 
 void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
-    state->pc = *offsetByMode(state, opcode, mode);
+    //In order to return correct address, subtract by state->memory to eliminate arbitrary memory placement
+    state->pc = static_cast<uint16_t>(offsetByMode(state, opcode, mode) - state->memory);
 }
 
 void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->pc += pcByMode(mode);
     
-    uint16_t offset = *offsetByMode(state, opcode, mode);
+    //Gets correct address by subtracting where state->memory begins
+    uint16_t offset = (offsetByMode(state, opcode, mode) - state->memory);
     
     //Load program counter onto stack
     state->memory[state->s] = static_cast<uint8_t>(state->pc >> 8);

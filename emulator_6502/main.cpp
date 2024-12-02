@@ -43,6 +43,7 @@ int main(int argc, const char * argv[])
 {
     State6502* state = init6502();
     
+
     /*
     uint8_t program[] = {
         0xA9, 0x01, 0xA2, 0xFF, 0xA0, 0x80, 0x8D, 0x00, 0x02, 0x8E, 0x01, 0x02,
@@ -58,7 +59,7 @@ int main(int argc, const char * argv[])
         state->memory[counter] = opcode;
         counter++;
     }
-     */
+    
     
     std::string filepath = "./roms/Donkey Kong (Japan).nes";
     readFile(state, filepath, 0x8000);
@@ -68,5 +69,5 @@ int main(int argc, const char * argv[])
     {
         disassemble(state);
     }
-    
+    */
 }
