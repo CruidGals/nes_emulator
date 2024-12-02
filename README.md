@@ -14,8 +14,8 @@ Contains emulation of the MOS 6502 CPU and (soon) the machine hardware of the or
 ## TO-DO List
 
 - Debug all the 6502 CPU Instructions in preparation for mounting the CPU onto the hardware code
-- Implement tracking for CPU cycles
 - Learn NES hardware and recreate it in code
+- At least make it able to run Donkey Kong
 
 ## Referenced Materials
 
