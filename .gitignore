@@ -5,3 +5,7 @@
 # Ignore build products
 build/
 DerivedData/
+
+# Other
+.DS_Store
+emulator_6502.xcodeproj/project.xcworkspace/xcuserdata/kylechiem.xcuserdatad/UserInterfaceState.xcuserstate
