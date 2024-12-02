@@ -45,19 +45,24 @@ uint16_t ZPOffset(const uint8_t *const opcode, const uint8_t index = 0)
 //Returns memory offset for X-Indexed Zero Page Indirect Addressing Mode
 uint16_t XIndexZPIndirectOffset(const State6502 *const state, const uint8_t *const opcode)
 {
-    return static_cast<uint16_t>(state->memory[(static_cast<uint16_t>(opcode[1]) + static_cast<uint16_t>(state->x) + 1)] << 8) | (static_cast<uint16_t>(opcode[1]) + static_cast<uint16_t>(state->x));
+    return static_cast<uint16_t>(state->memory[static_cast<uint16_t>(opcode[1] + state->x + 1)]) << 8 | static_cast<uint16_t>(state->memory[static_cast<uint16_t>(opcode[1] + state->x)]);
 }
 
 //Returns memory offset for Zero Page Indirect Y-Indexed Addressing Mode
 uint16_t YIndexZPIndirectOffset(const State6502 *const state, const uint8_t *const opcode)
 {
-    return (static_cast<uint16_t>(state->memory[opcode[1] + 1] << 8) | static_cast<uint16_t>(opcode[1])) + static_cast<uint16_t>(state->y);
+    return (static_cast<uint16_t>(state->memory[opcode[1] + 1]) << 8 | static_cast<uint16_t>(state->memory[opcode[1]])) + static_cast<uint16_t>(state->y);
 }
 
+//Specific function for Absolute Indirect Addressing Mode
 uint16_t AbsoluteIndirectOffset(const State6502 *const state, const uint8_t *const opcode)
 {
-    uint16_t offset = AbsoluteOffset(opcode);
-    return (static_cast<uint16_t>(state->memory[offset + 1]) << 8) | static_cast<uint16_t>(offset);
+    const uint8_t lowByte = state->memory[static_cast<uint16_t>(opcode[2]) << 8 | static_cast<uint16_t>(opcode[1])];
+    
+    //Preserves quirk that page is not crossed during Absolute Indirect Addressing (meaning high byte of address is unchanged)
+    const uint8_t highByte = state->memory[static_cast<uint16_t>(opcode[2]) << 8 | static_cast<uint16_t>(opcode[1] + 1)];
+    
+    return static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte);
 }
 
 uint8_t* offsetByMode(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
@@ -66,9 +71,9 @@ uint8_t* offsetByMode(State6502 *const state, uint8_t *const opcode, const Addre
         case ACCUMULATOR: return &state->a;
         case IMMEDIATE: return &opcode[1];
         case ABSOLUTE: return &state->memory[AbsoluteOffset(opcode)];
+        case ABSOLUTE_INDIRECT: return &state->memory[AbsoluteIndirectOffset(state, opcode)];
         case X_INDEXED_ABSOLUTE: return &state->memory[AbsoluteOffset(opcode, state->x)];
         case Y_INDEXED_ABSOLUTE: return &state->memory[AbsoluteOffset(opcode, state->y)];
-        case ABSOLUTE_INDIRECT: return &state->memory[AbsoluteIndirectOffset(state, opcode)];
         case ZERO_PAGE: return &state->memory[ZPOffset(opcode)];
         case X_INDEXED_ZERO_PAGE: return &state->memory[ZPOffset(opcode, state->x)];
         case Y_INDEXED_ZERO_PAGE: return &state->memory[ZPOffset(opcode, state->y)];
@@ -525,8 +530,7 @@ void RTS(State6502 *const state)
 
 void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
-    uint16_t offset = *offsetByMode(state, opcode, mode);
-    state->pc = (offset + 1) << 8 | offset;
+    state->pc = *offsetByMode(state, opcode, mode);
 }
 
 void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
