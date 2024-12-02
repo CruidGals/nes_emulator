@@ -100,7 +100,7 @@ uint8_t pcByMode(const AddressingMode mode)
         case Y_INDEXED_ZERO_PAGE: return 1;
         case X_INDEXED_ZERO_PAGE_INDIRECT: return 1;
         case ZERO_PAGE_INDIRECT_Y_INDEXED: return 1;
-        case RELATIVE: return 2;
+        case RELATIVE: return 1;
         
         default:
             return 0;
@@ -450,7 +450,7 @@ int BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
     }
     
     //Branch functions itself take 2 bytes
-    (*pc)++;
+    *pc += pcByMode(RELATIVE);
     
     return cycles;
 }
