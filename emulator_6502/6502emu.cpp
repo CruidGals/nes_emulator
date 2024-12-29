@@ -290,7 +290,7 @@ int ADC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode
 int SBC(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t offset = *offsetByMode(state, opcode, mode);
-    uint16_t result = static_cast<uint16_t>(state->a) - static_cast<uint16_t>(offset) - (1 - state->ps.c);
+    uint16_t result = static_cast<uint16_t>(state->a) - static_cast<uint16_t>(offset) - (0x0001 - state->ps.c);
     
     //Set overflow flag before state->a is updated
     state->ps.v = (((state->a ^ result) & (state->a ^ offset) & 0x80) != 0); //Overflow if num both negative/positive (given by 7th bit)
@@ -317,7 +317,7 @@ int CMP_INDEX(State6502 *const state, uint8_t *const opcode, const AddressingMod
     uint8_t result = index - offset;
     
     //Flags
-    state->ps.c = index > offset;
+    state->ps.c = index >= offset;
     bitwiseOpFlags(state, result);
     
     state->pc += pcByMode(mode);
@@ -349,6 +349,8 @@ void STY(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 int LDA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->a = *offsetByMode(state, opcode, mode);
+    bitwiseOpFlags(state, state->a);
+    
     state->pc += pcByMode(mode);
     
     return detectPageCross(state, opcode, mode);
@@ -358,6 +360,8 @@ int LDA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode
 int LDX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->x = *offsetByMode(state, opcode, mode);
+    bitwiseOpFlags(state, state->x);
+    
     state->pc += pcByMode(mode);
     
     return detectPageCross(state, opcode, mode);
@@ -367,6 +371,8 @@ int LDX(State6502 *const state, uint8_t *const opcode, const AddressingMode mode
 int LDY(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     state->y = *offsetByMode(state, opcode, mode);
+    bitwiseOpFlags(state, state->y);
+    
     state->pc += pcByMode(mode);
     
     return detectPageCross(state, opcode, mode);
@@ -1040,11 +1046,11 @@ int emulate(State6502 *state)
             break;
     }
     
-    //std::cout << "A: " << static_cast<int>(state->a) << " X: " << static_cast<int>(state->x) << " Y: " << static_cast<int>(state->y) << " S: " << static_cast<int>(state->s) << std::endl;
-    //std::cout << "C: " << static_cast<int>(state->ps.c) << " Z: " << static_cast<int>(state->ps.z) << " I: " << static_cast<int>(state->ps.i) << " D: " << static_cast<int>(state->ps.d) << " B: " << static_cast<int>(state->ps.b) << " V:" << static_cast<int>(state->ps.v) << " N: " << static_cast<int>(state->ps.n) << std::endl;
+    std::cout << "A: " << static_cast<int>(state->a) << " X: " << static_cast<int>(state->x) << " Y: " << static_cast<int>(state->y) << " S: " << static_cast<int>(state->s) << std::endl;
+    std::cout << "C: " << static_cast<int>(state->ps.c) << " Z: " << static_cast<int>(state->ps.z) << " I: " << static_cast<int>(state->ps.i) << " D: " << static_cast<int>(state->ps.d) << " B: " << static_cast<int>(state->ps.b) << " V:" << static_cast<int>(state->ps.v) << " N: " << static_cast<int>(state->ps.n) << std::endl;
     
     
-    return 0;
+    return cycles;
 }
 
 void disassemble(State6502 *state)
