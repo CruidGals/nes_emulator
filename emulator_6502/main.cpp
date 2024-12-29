@@ -45,8 +45,7 @@ int main(int argc, const char * argv[])
     State6502* state = init6502();
     
     uint8_t program[] = {
-        0xA2, 0x01, 0xA9, 0x81, 0x9D, 0x00, 0x20, 0x7E, 0x00, 0x20,  // ROR Test 6: Absolute,X
-
+        0xA9, 0x55, 0x8D, 0x00, 0x20, 0xA9, 0xAA, 0x0D, 0x00, 0x20
     };
     
     int counter { 0 };
@@ -66,7 +65,7 @@ int main(int argc, const char * argv[])
     {
         cycles += emulate(state);
     }
-    std::cout << static_cast<int>(state->memory[0x2001]) << std::endl;
+    
     std::cout << cycles << std::endl;
     
     return 0;

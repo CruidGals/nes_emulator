@@ -174,10 +174,12 @@ int ORA(State6502 *const state, uint8_t *const opcode, const AddressingMode mode
 
 void BIT(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
-    uint8_t result = state->a & *offsetByMode(state, opcode, mode);
-    state->ps.v = (0x40 == (result & 0x40));
+    uint8_t offset = *offsetByMode(state, opcode, mode);
+    uint8_t result = state->a & offset;
+    
+    state->ps.v = (0x40 == (offset & 0x40));
     state->ps.z = result == 0x00;
-    state->ps.n = 0x80 == (result & 0x80);
+    state->ps.n = 0x80 == (offset & 0x80);
     state->pc += pcByMode(mode);
 }
 
