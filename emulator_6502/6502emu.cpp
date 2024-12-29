@@ -206,11 +206,13 @@ int EOR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode
 void ASL(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t* p = offsetByMode(state, opcode, mode);
-    uint16_t result = *p << 1;
-    *p = static_cast<uint8_t>(result);
+    
+    //Set carry bit before lost
+    state->ps.c = 0x80 == (*p & 0x80);
+    
+    *p = *p << 1;
     
     //Flags
-    state->ps.c = (0x0100 == (result & 0x0100));
     state->ps.z = *p == 0x00;
     state->ps.n = 0x80 == (*p & 0x80);
     state->pc += pcByMode(mode);
@@ -221,13 +223,13 @@ void LSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     uint8_t* p = offsetByMode(state, opcode, mode);
     
     //Set carry bit before lost
-    state->ps.c = *p & 0x01;
+    state->ps.c = 0x01 == (*p & 0x01);
     
     *p = *p >> 1;
     
     //Rest of Flags
     state->ps.z = *p == 0x00;
-    state->ps.n = 0x80 == (*p & 0x80);
+    state->ps.n = 0;
     state->pc += pcByMode(mode);
 }
 
@@ -238,9 +240,13 @@ void LSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 void ROL(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t* offset = offsetByMode(state, opcode, mode);
-    uint16_t result = static_cast<uint16_t>(*offset) << 1 | state->ps.c;
-    *offset = static_cast<uint8_t>(result);
-    state->ps.c = 0x0100 == (result & 0x0100);
+    uint8_t result = *offset << 1 | state->ps.c;
+    
+    //Set carry bit before lost
+    state->ps.c = 0x80 == (*offset & 0x80);
+    
+    *offset = result;
+    
     state->ps.z = *offset == 0x00;
     state->ps.n = 0x80 == (*offset & 0x80);
     state->pc += pcByMode(mode);
@@ -253,11 +259,12 @@ void ROL(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 void ROR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
     uint8_t* offset = offsetByMode(state, opcode, mode);
+    uint8_t result = *offset >> 1 | state->ps.c << 7;
     
     //Set carry bit before lost by bit maneuver
-    state->ps.c = *offset & 0x01;
+    state->ps.c = 0x01 == (*offset & 0x01);
     
-    *offset = *offset >> 1 | state->ps.c << 7;
+    *offset = result;
     state->ps.z = *offset == 0x00;
     state->ps.n = 0x80 == (*offset & 0x80);
     state->pc += pcByMode(mode);
