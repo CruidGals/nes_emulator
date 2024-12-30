@@ -550,13 +550,13 @@ void RTI(State6502 *const state)
 
 void RTS(State6502 *const state)
 {
-    //Load program counter (subtract by one to get exact memory address next time through)
+    //Load program counter (add by one)
     incStack(state);
     uint8_t lowByte = state->memory[0x100 | (state->s)];
     incStack(state);
     uint8_t highByte = state->memory[0x100 | (state->s)];
     
-    state->pc = static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte);
+    state->pc = static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte) + 1;
 }
 
 void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)

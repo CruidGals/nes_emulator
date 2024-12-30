@@ -46,7 +46,7 @@ int main(int argc, const char * argv[])
     State6502* state = init6502();
     
     uint8_t program[] = {
-        0x6C, 0x10, 0x20
+        0x38, 0x90, 0x02, 0xA2, 0x04, 0xA9, 0x01, 0xC8
     };
     
     int counter { 0 };
@@ -62,12 +62,11 @@ int main(int argc, const char * argv[])
     state->pc = 0;
     int cycles = 0;
     
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
     {
         cycles += emulate(state);
     }
     
-    std::cout << static_cast<int>(state->pc) << std::endl;
     std::cout << cycles << std::endl;
     
     return 0;
