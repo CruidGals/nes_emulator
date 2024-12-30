@@ -150,6 +150,10 @@ static void unparseProcessorStatus(ProcessorStatus *const ps, const uint8_t stat
     ps->c = (status & 0x01) > 0;
 }
 
+// Used to safely inc and dec stack pointer
+void incStack(State6502 *const state) { if (state->s < 255) state->s++; }
+void decStack(State6502 *const state) { if (state->s > 0) state->s--; }
+
 //Flags -----------------------------------------
 
 void bitwiseOpFlags(State6502 *const state, uint8_t comp)
@@ -475,7 +479,7 @@ int BRANCH(uint16_t *const pc, uint8_t *const opcode, const bool test_set)
 void PHA(State6502 *const state)
 {
     state->memory[0x100 | state->s] = state->a;
-    state->s--;
+    decStack(state);
 }
 
 void PHP(State6502 *const state)
@@ -483,19 +487,19 @@ void PHP(State6502 *const state)
     //Parse Processor Status into uin8_t
     uint8_t status = parseProcessorStatus(&state->ps);
     state->memory[0x100 | state->s] = status;
-    state->s--;
+    decStack(state);
 }
 
 void PLA(State6502 *const state)
 {
-    state->s++;
+    incStack(state);
     state->a = state->memory[0x100 | state->s];
     bitwiseOpFlags(state, state->a);
 }
 
 void PLP(State6502 *const state)
 {
-    state->s++;
+    incStack(state);
     uint8_t status = state->memory[0x100 | state->s];
     
     //Unparse Processor Status
@@ -513,13 +517,13 @@ void BRK(State6502 *const state)
     
     //Push PC onto stack
     state->memory[0x100 | state->s] = static_cast<uint8_t>(state->pc & 0x80);
-    state->s--;
+    decStack(state);
     state->memory[0x100 | state->s] = static_cast<uint8_t>(state->pc >> 8);
-    state->s--;
+    decStack(state);
     
     //Set Break Flag and Push status Stack
     state->memory[0x100 | state->s] = parseProcessorStatus(&state->ps);
-    state->s--;
+    decStack(state);
     
     //Set Interrupt Flag
     state->ps.i = 1;
@@ -531,21 +535,28 @@ void BRK(State6502 *const state)
 void RTI(State6502 *const state)
 {
     // Get processor status
-    unparseProcessorStatus(&state->ps, state->memory[0x100 | (state->s + 1)]);
+    incStack(state);
+    unparseProcessorStatus(&state->ps, state->memory[0x100 | (state->s)]);
     
     //Load program counter (subtract by one to get exact memory address next time through)
-    state->pc = static_cast<uint16_t>(state->memory[0x100 | (state->s + 3)]) << 8 | static_cast<uint16_t>(state->memory[0x100 | (state->s + 2)]);
-    state->pc--;
+    incStack(state);
+    uint8_t lowByte = state->memory[0x100 | (state->s)];
+    incStack(state);
+    uint8_t highByte = state->memory[0x100 | (state->s)];
     
-    state->s += 3;
+    state->pc = static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte);
+    state->pc--;
 }
 
 void RTS(State6502 *const state)
 {
     //Load program counter (subtract by one to get exact memory address next time through)
-    state->pc = static_cast<uint16_t>(state->memory[0x100 | (state->s + 2)]) << 8 | static_cast<uint16_t>(state->memory[0x100 | (state->s + 1)]);
+    incStack(state);
+    uint8_t lowByte = state->memory[0x100 | (state->s)];
+    incStack(state);
+    uint8_t highByte = state->memory[0x100 | (state->s)];
     
-    state->s += 2;
+    state->pc = static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte);
 }
 
 void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
@@ -564,9 +575,9 @@ void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
     
     //Load program counter onto stack
     state->memory[state->s] = static_cast<uint8_t>(state->pc >> 8);
-    state->s--;
+    decStack(state);
     state->memory[state->s] = static_cast<uint8_t>(state->pc);
-    state->s--;
+    decStack(state);
     
     //Redirect program counter
     state->pc = offset;
