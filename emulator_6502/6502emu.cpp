@@ -500,13 +500,16 @@ void PLP(State6502 *const state)
     
     //Unparse Processor Status
     unparseProcessorStatus(&state->ps, status);
+    
+    //Break flag not restored though (lowk ignored)
+    state->ps.b = 0;
 }
 
 /* ---------------- CONTROL INSTRUCTIONS ---------------- */
 
 void BRK(State6502 *const state)
 {
-    state->pc += 2;
+    state->pc++;
     
     //Push PC onto stack
     state->memory[0x100 | state->s] = static_cast<uint8_t>(state->pc & 0x80);
@@ -553,7 +556,8 @@ void JMP(State6502 *const state, uint8_t *const opcode, const AddressingMode mod
 
 void JSR(State6502 *const state, uint8_t *const opcode, const AddressingMode mode)
 {
-    state->pc += pcByMode(mode);
+    //PC incremented in emulate(), need to store (pc + 2) into stack
+    state->pc++;
     
     //Gets correct address by subtracting where state->memory begins
     uint16_t offset = (offsetByMode(state, opcode, mode) - state->memory);

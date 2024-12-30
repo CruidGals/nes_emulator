@@ -36,6 +36,7 @@ State6502* init6502()
 {
     State6502* state = static_cast<State6502*>(calloc(1, sizeof(State6502)));
     state->memory = static_cast<uint8_t*>(calloc(0x10000, sizeof(uint8_t)));
+    state->ps.i = 1;
     state->s = 0xff;
     return state;
 }
@@ -45,7 +46,7 @@ int main(int argc, const char * argv[])
     State6502* state = init6502();
     
     uint8_t program[] = {
-        0xA9, 0x55, 0x8D, 0x00, 0x20, 0xA9, 0xAA, 0x0D, 0x00, 0x20
+        0x6C, 0x10, 0x20
     };
     
     int counter { 0 };
@@ -61,11 +62,12 @@ int main(int argc, const char * argv[])
     state->pc = 0;
     int cycles = 0;
     
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 1; i++)
     {
         cycles += emulate(state);
     }
     
+    std::cout << static_cast<int>(state->pc) << std::endl;
     std::cout << cycles << std::endl;
     
     return 0;
