@@ -11,16 +11,18 @@
 #include <stdio.h>
 #include <stdint.h>
 
-/* 
+namespace Registers
+{
+/*
  Memory mapped registers to the CPU
  
  For each register, keep Bitfields to easily track the bits in register
-*/
-struct PPURegisters
+ */
+struct CPUMapped
 {
     union PPUCTRL // $2000
     {
-        struct 
+        struct
         {
             unsigned N : 2; // Base Nametable addr (0: $2000, 1: $2400, 2: $2800, 3: $2c00)
             unsigned I : 1; // Direction of VRAM Incr. after reading PPUData (0: go across [add 1], 1: go down [add 32])
@@ -60,15 +62,7 @@ struct PPURegisters
     } PPUSTATUS;
     uint8_t OAMADDR;    // $2003
     uint8_t OAMDATA;    // $2004
-    union PPUSCROLL // $2005
-    {
-        struct
-        {
-            unsigned lo : 8;
-            unsigned hi : 8;
-        };
-        uint8_t val;
-    } PPUSCROLL;
+    uint8_t PPUSCROLL; // $2005
     union PPUADDR // $2006
     {
         struct
@@ -82,13 +76,35 @@ struct PPURegisters
     uint8_t OAMDMA;     // $4014
 };
 
+struct Internal
+{
+    union // Current (v) and Temp (t) VRAM address separated bitdields
+    {
+        struct
+        {
+            unsigned coarseX : 5;   // Coarse X scroll
+            unsigned coarseY : 5;   // Coarse Y scroll
+            unsigned nametable : 2; // Nametable select
+            unsigned fineY : 3;     // Fine y scroll
+        };
+        uint16_t val;
+    } v, t;
+    
+    uint8_t x : 3; // Fine X scroll
+    uint8_t w : 1; // First or second write toggle
+};
+
+} // namespace Registers
+
 class PPU
 {
     //Internal registers
-    struct PPURegisters regs;
+    struct Registers::CPUMapped regs;
+    struct Registers::Internal intRegs;
     uint8_t *memory;
     
 public:
+    // Used to talk between CPU and PPU
     uint8_t cpuDataBus;
     
     //Constructors Destructors
@@ -106,8 +122,8 @@ public:
     const uint8_t& operator[](uint16_t address) const;
     
     //PPU Memory write functions
-    void read(uint16_t addr);
-    void write(uint16_t addr);
+    uint8_t read(uint16_t addr);
+    void write(uint16_t addr, uint8_t result);
 };
 
 #endif /* PPU_hpp */
