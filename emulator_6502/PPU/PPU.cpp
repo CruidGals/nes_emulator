@@ -21,19 +21,19 @@ PPU::~PPU()
 }
 
 //Power up function
-void PPU::powerReset(bool isReset)
+void PPU::powerResetState(bool isReset)
 {
-    regs.PPUCTRL = 0;
-    regs.PPUMASK = 0;
-    regs.PPUSTATUS = (isReset) ? regs.PPUSTATUS | 0x80 : 0xa0;
-    regs.PPUSCROLL = 0;
+    regs.PPUCTRL.val = 0;
+    regs.PPUMASK.val = 0;
+    regs.PPUSTATUS.val = (isReset) ? regs.PPUSTATUS.val | 0x80 : 0xa0;
+    regs.PPUSCROLL.val = 0;
     regs.PPUDATA = 0;
     
     // Registers that are only changed by Power on events
     if (!isReset)
     {
         regs.OAMADDR = 0;
-        regs.PPUADDR = 0;
+        regs.PPUADDR.val = 0;
     }
 }
 

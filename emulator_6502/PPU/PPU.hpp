@@ -31,7 +31,7 @@ struct PPURegisters
             unsigned V : 1; // Vblank NMI enable (0: off, 1: on)
         };
         uint8_t val; // Full val of union
-    };
+    } PPUCTRL;
     union PPUMASK    // $2001
     {
         struct
@@ -46,7 +46,7 @@ struct PPURegisters
             unsigned B : 1; // Emphasize blue
         };
         uint8_t val; // Full val of union
-    };
+    } PPUMASK;
     union PPUSTATUS  // $2002
     {
         struct
@@ -57,7 +57,7 @@ struct PPURegisters
             unsigned V : 1;
         };
         uint8_t val; // Full val of union
-    };
+    } PPUSTATUS;
     uint8_t OAMADDR;    // $2003
     uint8_t OAMDATA;    // $2004
     union PPUSCROLL // $2005
@@ -68,7 +68,7 @@ struct PPURegisters
             unsigned hi : 8;
         };
         uint8_t val;
-    };
+    } PPUSCROLL;
     union PPUADDR // $2006
     {
         struct
@@ -77,7 +77,7 @@ struct PPURegisters
             unsigned hi : 8; // Only should go up to 6 bits
         };
         uint8_t val;
-    };
+    } PPUADDR;
     uint8_t PPUDATA;    // $2007
     uint8_t OAMDMA;     // $4014
 };
@@ -100,7 +100,7 @@ public:
      
      Power up state and Reset state differ marginally, so put in same function
      */
-    void powerReset(bool isReset);
+    void powerResetState(bool isReset);
     
     // Overload operator[] for memory access (read only)
     const uint8_t& operator[](uint16_t address) const;
