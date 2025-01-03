@@ -8,7 +8,8 @@
 #include <iostream>
 #include <fstream>
 #include <stdint.h>
-#include "6502emu.hpp"
+#include "CPU/6502emu.hpp"
+#include "PPU/PPU.hpp"
 
 //Loads hex file into 6502 memory
 void readFile(State6502 *const state, const std::string_view filename, uint32_t offset)
@@ -41,8 +42,18 @@ State6502* init6502()
     return state;
 }
 
+void free6502(State6502* state)
+{
+    if (state)
+    {
+        free(state->memory);
+        free(state);
+    }
+}
+
 int main(int argc, const char * argv[]) 
 {
+    /*
     State6502* state = init6502();
     
     uint8_t program[] = {
@@ -57,8 +68,8 @@ int main(int argc, const char * argv[])
         counter++;
     }
     
-    /*std::string filepath = "./roms/Donkey Kong (Japan).nes";
-    readFile(state, filepath, 0x8000);*/
+    std::string filepath = "./roms/Donkey Kong (Japan).nes";
+    readFile(state, filepath, 0x8000);
     state->pc = 0;
     int cycles = 0;
     
@@ -68,6 +79,9 @@ int main(int argc, const char * argv[])
     }
     
     std::cout << cycles << std::endl;
+    
+    free6502(state);
+     */
     
     return 0;
 }

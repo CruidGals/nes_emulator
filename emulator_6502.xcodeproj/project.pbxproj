@@ -53,6 +53,24 @@
 			path = roms;
 			sourceTree = "<group>";
 		};
+		27E4B02B2D27ACB50018AEED /* PPU */ = {
+			isa = PBXGroup;
+			children = (
+				27114B212CED36BC008B30D1 /* PPU.hpp */,
+				27114B202CED36BC008B30D1 /* PPU.cpp */,
+			);
+			path = PPU;
+			sourceTree = "<group>";
+		};
+		27E4B02C2D27ACBE0018AEED /* CPU */ = {
+			isa = PBXGroup;
+			children = (
+				27F3A9E42CC01F4C00929760 /* 6502emu.cpp */,
+				27F3A9E52CC01F4C00929760 /* 6502emu.hpp */,
+			);
+			path = CPU;
+			sourceTree = "<group>";
+		};
 		27F3A9D12CC01D5700929760 = {
 			isa = PBXGroup;
 			children = (
@@ -73,11 +91,9 @@
 			isa = PBXGroup;
 			children = (
 				27114B232CEEC620008B30D1 /* roms */,
-				27114B212CED36BC008B30D1 /* PPU.hpp */,
-				27114B202CED36BC008B30D1 /* PPU.cpp */,
+				27E4B02B2D27ACB50018AEED /* PPU */,
 				27F3A9DD2CC01D5700929760 /* main.cpp */,
-				27F3A9E42CC01F4C00929760 /* 6502emu.cpp */,
-				27F3A9E52CC01F4C00929760 /* 6502emu.hpp */,
+				27E4B02C2D27ACBE0018AEED /* CPU */,
 			);
 			path = emulator_6502;
 			sourceTree = "<group>";
