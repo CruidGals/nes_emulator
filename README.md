@@ -14,7 +14,9 @@ Contains emulation of the MOS 6502 CPU and (soon) the machine hardware of the or
 ## TO-DO List
 
 - Re-organize the CPU code to use namespaces and classes. Will improve readability and adaptabilty significantly
+- Implement memory mirroring for CPU ram. (IMPORTANT)
 - Implement interrupt handler (in CPU) for IRQ, NMI, Reset.
+- Try and emulate the pins on CPU
 - Learn NES hardware, especially the architecture that connects the PPU and CPU together.
 - At least make it able to run Donkey Kong
 
