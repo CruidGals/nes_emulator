@@ -8,6 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		27114B222CED36BC008B30D1 /* PPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27114B202CED36BC008B30D1 /* PPU.cpp */; };
+		27E4B0312D28AEF30018AEED /* libsfml-graphics.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0302D28AEF30018AEED /* libsfml-graphics.dylib */; };
+		27E4B0332D28AEF80018AEED /* libsfml-network.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0322D28AEF80018AEED /* libsfml-network.dylib */; };
+		27E4B0352D28AEFB0018AEED /* libsfml-system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0342D28AEFB0018AEED /* libsfml-system.dylib */; };
+		27E4B0372D28AEFD0018AEED /* libsfml-window.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0362D28AEFD0018AEED /* libsfml-window.dylib */; };
+		27E4B0392D28AF000018AEED /* libsfml-audio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0382D28AF000018AEED /* libsfml-audio.dylib */; };
+		27E4B03B2D28B1510018AEED /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B03A2D28B1510018AEED /* OpenAL.framework */; };
+		27E4B03D2D28B1780018AEED /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B03C2D28B1780018AEED /* CoreAudio.framework */; };
+		27E4B03F2D28B18E0018AEED /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B03E2D28B18E0018AEED /* Carbon.framework */; };
+		27E4B0412D28B1A00018AEED /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0402D28B1A00018AEED /* AudioToolbox.framework */; };
+		27E4B0432D28B1AF0018AEED /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E4B0422D28B1AF0018AEED /* IOKit.framework */; };
+		27E4B0472D28B8C30018AEED /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B0452D28B8C30018AEED /* gui.cpp */; };
+		27E4B04D2D29A5720018AEED /* instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B04B2D29A5720018AEED /* instructions.cpp */; };
 		27F3A9DE2CC01D5700929760 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9DD2CC01D5700929760 /* main.cpp */; };
 		27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9E42CC01F4C00929760 /* 6502emu.cpp */; };
 /* End PBXBuildFile section */
@@ -28,6 +40,21 @@
 		27114B202CED36BC008B30D1 /* PPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PPU.cpp; sourceTree = "<group>"; };
 		27114B212CED36BC008B30D1 /* PPU.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PPU.hpp; sourceTree = "<group>"; };
 		27114B252CEEC7F8008B30D1 /* Donkey Kong (Japan).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (Japan).nes"; sourceTree = "<group>"; };
+		27E4B02E2D28AEE30018AEED /* libsfml-graphics.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-graphics.3.0.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-graphics.3.0.dylib"; sourceTree = "<group>"; };
+		27E4B0302D28AEF30018AEED /* libsfml-graphics.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-graphics.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-graphics.dylib"; sourceTree = "<group>"; };
+		27E4B0322D28AEF80018AEED /* libsfml-network.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-network.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-network.dylib"; sourceTree = "<group>"; };
+		27E4B0342D28AEFB0018AEED /* libsfml-system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-system.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-system.dylib"; sourceTree = "<group>"; };
+		27E4B0362D28AEFD0018AEED /* libsfml-window.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-window.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-window.dylib"; sourceTree = "<group>"; };
+		27E4B0382D28AF000018AEED /* libsfml-audio.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libsfml-audio.dylib"; path = "../../../../../../../opt/homebrew/Cellar/sfml/3.0.0/lib/libsfml-audio.dylib"; sourceTree = "<group>"; };
+		27E4B03A2D28B1510018AEED /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = ../../../../../../../System/Library/Frameworks/OpenAL.framework; sourceTree = "<group>"; };
+		27E4B03C2D28B1780018AEED /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = ../../../../../../../System/Library/Frameworks/CoreAudio.framework; sourceTree = "<group>"; };
+		27E4B03E2D28B18E0018AEED /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = ../../../../../../../System/Library/Frameworks/Carbon.framework; sourceTree = "<group>"; };
+		27E4B0402D28B1A00018AEED /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = ../../../../../../../System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<group>"; };
+		27E4B0422D28B1AF0018AEED /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = ../../../../../../../System/Library/Frameworks/IOKit.framework; sourceTree = "<group>"; };
+		27E4B0452D28B8C30018AEED /* gui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gui.cpp; sourceTree = "<group>"; };
+		27E4B0462D28B8C30018AEED /* gui.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gui.hpp; sourceTree = "<group>"; };
+		27E4B04B2D29A5720018AEED /* instructions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = instructions.cpp; sourceTree = "<group>"; };
+		27E4B04C2D29A5720018AEED /* instructions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = instructions.hpp; sourceTree = "<group>"; };
 		27F3A9DA2CC01D5700929760 /* emulator_6502 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = emulator_6502; sourceTree = BUILT_PRODUCTS_DIR; };
 		27F3A9DD2CC01D5700929760 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		27F3A9E42CC01F4C00929760 /* 6502emu.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 6502emu.cpp; sourceTree = "<group>"; };
@@ -39,6 +66,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27E4B0432D28B1AF0018AEED /* IOKit.framework in Frameworks */,
+				27E4B0412D28B1A00018AEED /* AudioToolbox.framework in Frameworks */,
+				27E4B03F2D28B18E0018AEED /* Carbon.framework in Frameworks */,
+				27E4B03D2D28B1780018AEED /* CoreAudio.framework in Frameworks */,
+				27E4B03B2D28B1510018AEED /* OpenAL.framework in Frameworks */,
+				27E4B0312D28AEF30018AEED /* libsfml-graphics.dylib in Frameworks */,
+				27E4B0332D28AEF80018AEED /* libsfml-network.dylib in Frameworks */,
+				27E4B0352D28AEFB0018AEED /* libsfml-system.dylib in Frameworks */,
+				27E4B0372D28AEFD0018AEED /* libsfml-window.dylib in Frameworks */,
+				27E4B0392D28AF000018AEED /* libsfml-audio.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,8 +104,37 @@
 			children = (
 				27F3A9E42CC01F4C00929760 /* 6502emu.cpp */,
 				27F3A9E52CC01F4C00929760 /* 6502emu.hpp */,
+				27E4B04B2D29A5720018AEED /* instructions.cpp */,
+				27E4B04C2D29A5720018AEED /* instructions.hpp */,
 			);
 			path = CPU;
+			sourceTree = "<group>";
+		};
+		27E4B02D2D28AEE30018AEED /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				27E4B0422D28B1AF0018AEED /* IOKit.framework */,
+				27E4B0402D28B1A00018AEED /* AudioToolbox.framework */,
+				27E4B03E2D28B18E0018AEED /* Carbon.framework */,
+				27E4B03C2D28B1780018AEED /* CoreAudio.framework */,
+				27E4B03A2D28B1510018AEED /* OpenAL.framework */,
+				27E4B0382D28AF000018AEED /* libsfml-audio.dylib */,
+				27E4B0362D28AEFD0018AEED /* libsfml-window.dylib */,
+				27E4B0342D28AEFB0018AEED /* libsfml-system.dylib */,
+				27E4B0322D28AEF80018AEED /* libsfml-network.dylib */,
+				27E4B0302D28AEF30018AEED /* libsfml-graphics.dylib */,
+				27E4B02E2D28AEE30018AEED /* libsfml-graphics.3.0.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		27E4B0442D28B89E0018AEED /* screen */ = {
+			isa = PBXGroup;
+			children = (
+				27E4B0452D28B8C30018AEED /* gui.cpp */,
+				27E4B0462D28B8C30018AEED /* gui.hpp */,
+			);
+			path = screen;
 			sourceTree = "<group>";
 		};
 		27F3A9D12CC01D5700929760 = {
@@ -76,6 +142,7 @@
 			children = (
 				27F3A9DC2CC01D5700929760 /* emulator_6502 */,
 				27F3A9DB2CC01D5700929760 /* Products */,
+				27E4B02D2D28AEE30018AEED /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,9 +157,10 @@
 		27F3A9DC2CC01D5700929760 /* emulator_6502 */ = {
 			isa = PBXGroup;
 			children = (
+				27F3A9DD2CC01D5700929760 /* main.cpp */,
+				27E4B0442D28B89E0018AEED /* screen */,
 				27114B232CEEC620008B30D1 /* roms */,
 				27E4B02B2D27ACB50018AEED /* PPU */,
-				27F3A9DD2CC01D5700929760 /* main.cpp */,
 				27E4B02C2D27ACBE0018AEED /* CPU */,
 			);
 			path = emulator_6502;
@@ -156,8 +224,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				27114B222CED36BC008B30D1 /* PPU.cpp in Sources */,
+				27E4B0472D28B8C30018AEED /* gui.cpp in Sources */,
 				27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */,
 				27F3A9DE2CC01D5700929760 /* main.cpp in Sources */,
+				27E4B04D2D29A5720018AEED /* instructions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +286,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /opt/homebrew/Cellar/sfml/3.0.0/include;
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/Cellar/sfml/3.0.0/lib;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -271,6 +343,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /opt/homebrew/Cellar/sfml/3.0.0/include;
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/Cellar/sfml/3.0.0/lib;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.2;
 				MTL_ENABLE_DEBUG_INFO = NO;

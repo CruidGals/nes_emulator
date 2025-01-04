@@ -10,32 +10,50 @@
 
 #include <stdint.h>
 
-struct ProcessorStatus
-{
-    uint8_t c:1; //0 - carry bit        1 = carry
-    uint8_t z:1; //1 - zero bit         1 = zero
-    uint8_t i:1; //2 - Irq disable      1 = disable
-    uint8_t d:1; //3 - Decimal mode     1 = True
-    uint8_t b:1; //4 - Break command    1 = BRK
-    //5th code skipped (Expansion code)
-    uint8_t v:1; //6 - Overflow         1 = True
-    uint8_t n:1; //7 - Negative         1 = NEG
-};
-
-typedef struct State6502
-{
+class cpu6502 {
+    
+public:
     uint8_t a;  //Accumulator
     uint8_t x;  //X index register
     uint8_t y;  //Y index register
     uint8_t s;  //Stack pointer
     
-    uint16_t pc; //Program counter
-    uint8_t *memory; //Memory accessed by program counter
-    struct ProcessorStatus ps; //Processor status
+    union //Program counter
+    {
+        struct
+        {
+            unsigned lo:8;  //Low and
+            unsigned hi:8;  //High byte for easy manipulation
+        };
+        uint16_t val;
+    } pc;
     
-} State6502;
-
-int emulate(State6502 *state);
-void disassemble(State6502 *state);
+    uint8_t *memory; //Memory accessed by program counter
+    union // Processor Status codes
+    {
+        struct
+        {
+            unsigned c:1; //0 - carry bit        1 = carry
+            unsigned z:1; //1 - zero bit         1 = zero
+            unsigned i:1; //2 - Irq disable      1 = disable
+            unsigned d:1; //3 - Decimal mode     1 = True
+            unsigned b:1; //4 - Break command    1 = BRK
+            unsigned _:1; //5 - (SKIPPED BIT)
+            unsigned v:1; //6 - Overflow         1 = True
+            unsigned n:1; //7 - Negative         1 = NEG
+        };
+        uint8_t val;
+    } ps;
+    
+    /* ---------- CONSTRUCTORS AND DESTRUCTORS ----------*/
+    
+    cpu6502();
+    ~cpu6502();
+    
+    /* ---------- FUNCTIONS ---------- */
+    
+    int emulate();
+    void disassemble();
+};
 
 #endif /* _502emu_hpp */
