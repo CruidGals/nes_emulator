@@ -25,6 +25,72 @@ cpu6502::~cpu6502()
     free(memory);
 }
 
+/* ---------- HELPER FUNCTIONS ---------- */
+void cpu6502::incStack() { if (s < 255) s++; }
+void cpu6502::decStack() { if (s > 0) s--; }
+
+uint8_t cpu6502::parseProcessorStatus() { return ps.val; }
+void cpu6502::unparseProcessorStatus(const uint8_t status) { ps.val = status; }
+
+/* ---------- FUNCTIONS ---------- */
+
+int cpu6502::interrupt_handler(InterruptType type)
+{
+    // If interrupt disable is on, abort immediately (except when it is NMI)
+    if (ps.i &&
+        (type == InterruptType::BRK ||
+         type == InterruptType::IRQ ||
+         type == InterruptType::RESET)) 
+    {
+        return 0;
+    }
+
+    
+    // PC incremented to PC + 2 (pc is already incremented once duriing emulate() )
+    pc.val++;
+    
+    //Push PC onto stack
+    memory[0x100 | s] = pc.hi;
+    decStack();
+    memory[0x100 | s] = pc.lo;
+    decStack();
+    
+    // If BRK is called, then set break flag
+    ps.b = type == InterruptType::BRK;
+    memory[0x100 | s] = parseProcessorStatus();
+    decStack();
+    
+    //Set Interrupt Flag
+    ps.i = 1;
+    
+    //Load Interrupt vector into memory
+    switch (type) {
+        
+        // BRK and IRQ have the same interrupt vector
+        case InterruptType::BRK:
+            [[fallthrough]];    // Intentional fallthrough attribute to indicate that they have the same interrupt vector
+        case InterruptType::IRQ:
+            pc.lo = memory[0xFFFE];
+            pc.hi = memory[0xFFFF];
+            break;
+            
+        case InterruptType::NMI:
+            pc.lo = memory[0xFFFA];
+            pc.hi = memory[0xFFFB];
+            break;
+            
+        case InterruptType::RESET:
+            pc.lo = memory[0xFFFC];
+            pc.hi = memory[0xFFFD];
+            break;
+            
+        default:
+            break;
+    }
+    
+    return 7; // Number of cycles
+}
+
 int cpu6502::emulate()
 {
     using namespace AddressingModeFuncs;
@@ -58,7 +124,7 @@ int cpu6502::emulate()
     switch (*opcode)
     {
         case 0x00: //BRK
-            Instructions::BRK(this);
+            interrupt_handler(InterruptType::BRK);
             break;
         case 0x01: //ORA - X-Indexed Zero Page Indirect
             Instructions::ORA(this, opcode, X_INDEXED_ZERO_PAGE_INDIRECT);

@@ -9,6 +9,9 @@
 #define _502emu_hpp
 
 #include <stdint.h>
+#include <string>
+
+enum class InterruptType { BRK, IRQ, RESET, NMI };
 
 class cpu6502 {
     
@@ -54,6 +57,15 @@ public:
     
     int emulate();
     void disassemble();
+    int interrupt_handler(InterruptType type);
+    
+    /* ---------- ACCESS FUNCTIONS ---------- */
+    
+    void incStack();    // Handles increment of stack (Make sure it doesn't go outta bounds)
+    void decStack();    // Handles decrement of stack (Make sure it doesn't go outta bounds)
+    
+    uint8_t parseProcessorStatus();
+    void unparseProcessorStatus(const uint8_t status);
 };
 
 #endif /* _502emu_hpp */

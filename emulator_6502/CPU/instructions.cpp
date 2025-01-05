@@ -93,16 +93,6 @@ namespace AddressingModeFuncs
 
 /* ---------- Helper Functions ---------- */
 
-uint8_t parseProcessorStatus(const cpu6502 *const cpu)
-{
-    return cpu->ps.val;
-}
-
-void unparseProcessorStatus(cpu6502 *const cpu, const uint8_t status)
-{
-    cpu->ps.val = status;
-}
-
 int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode)
 {
     using namespace AddressingModeFuncs;
@@ -130,10 +120,6 @@ int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingM
     
     return prev_high != new_high;
 }
-
-// Used to safely inc and dec stack pointer
-void incStack(cpu6502 *const cpu) { if (cpu->s < 255) cpu->s++; }
-void decStack(cpu6502 *const cpu) { if (cpu->s > 0) cpu->s--; }
 
 //Flags -----------------------------------------
 
@@ -463,31 +449,31 @@ namespace Instructions
     void PHA(cpu6502 *const cpu)
     {
         cpu->memory[0x100 | cpu->s] = cpu->a;
-        decStack(cpu);
+        cpu->decStack();
     }
 
     void PHP(cpu6502 *const cpu)
     {
         //Parse Processor Status into uin8_t
-        uint8_t status = parseProcessorStatus(cpu);
+        uint8_t status = cpu->parseProcessorStatus();
         cpu->memory[0x100 | cpu->s] = status;
-        decStack(cpu);
+        cpu->decStack();
     }
 
     void PLA(cpu6502 *const cpu)
     {
-        incStack(cpu);
+        cpu->incStack();
         cpu->a = cpu->memory[0x100 | cpu->s];
         bitwiseOpFlags(cpu, cpu->a);
     }
 
     void PLP(cpu6502 *const cpu)
     {
-        incStack(cpu);
+        cpu->incStack();
         uint8_t status = cpu->memory[0x100 | cpu->s];
         
         //Unparse Processor Status
-        unparseProcessorStatus(cpu, status);
+        cpu->unparseProcessorStatus(status);
         
         //Break flag not restored though (lowk ignored)
         cpu->ps.b = 0;
@@ -495,38 +481,18 @@ namespace Instructions
 
     /* ---------------- CONTROL INSTRUCTIONS ---------------- */
 
-    void BRK(cpu6502 *const cpu)
-    {
-        cpu->pc.val++;
-        
-        //Push PC onto stack
-        cpu->memory[0x100 | cpu->s] = cpu->pc.lo;
-        decStack(cpu);
-        cpu->memory[0x100 | cpu->s] = cpu->pc.hi;
-        decStack(cpu);
-        
-        //Set Break Flag and Push status Stack
-        cpu->memory[0x100 | cpu->s] = parseProcessorStatus(cpu);
-        decStack(cpu);
-        
-        //Set Interrupt Flag
-        cpu->ps.i = 1;
-        
-        //Load Interrupt vector into memory
-        cpu->pc.lo = cpu->memory[0xFFFE];
-        cpu->pc.hi = cpu->memory[0xFFFF];
-    }
+    // BRK Function is handled in cpu6502 in its interrupt handler
 
     void RTI(cpu6502 *const cpu)
     {
         // Get processor status
-        incStack(cpu);
-        unparseProcessorStatus(cpu, cpu->memory[0x100 | (cpu->s)]);
+        cpu->incStack();
+        cpu->unparseProcessorStatus(cpu->memory[0x100 | (cpu->s)]);
         
         //Load program counter (subtract by one to get exact memory address next time through)
-        incStack(cpu);
+        cpu->incStack();
         cpu->pc.lo = cpu->memory[0x100 | (cpu->s)];
-        incStack(cpu);
+        cpu->incStack();
         cpu->pc.hi = cpu->memory[0x100 | (cpu->s)];
         
         cpu->pc.val--;
@@ -535,9 +501,9 @@ namespace Instructions
     void RTS(cpu6502 *const cpu)
     {
         //Load program counter (add by one)
-        incStack(cpu);
+        cpu->incStack();
         cpu->pc.lo = cpu->memory[0x100 | (cpu->s)];
-        incStack(cpu);
+        cpu->incStack();
         cpu->pc.hi = cpu->memory[0x100 | (cpu->s)];
     }
 
@@ -557,9 +523,9 @@ namespace Instructions
         
         //Load program counter onto stack
         cpu->memory[cpu->s] = static_cast<uint8_t>(cpu->pc.hi);
-        decStack(cpu);
+        cpu->decStack();
         cpu->memory[cpu->s] = static_cast<uint8_t>(cpu->pc.lo);
-        decStack(cpu);
+        cpu->decStack();
         
         //Redirect program counter
         cpu->pc.val = offset;

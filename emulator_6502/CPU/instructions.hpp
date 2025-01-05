@@ -104,7 +104,7 @@ namespace Instructions
 
     /* ---------- Control Instructions ---------- */
 
-    void BRK(cpu6502 *const cpu);
+    // BRK instruction handled in cpu6502::interrupt_handler()
     void RTI(cpu6502 *const cpu);
     void RTS(cpu6502 *const cpu);
     void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
@@ -112,12 +112,7 @@ namespace Instructions
 }
 
 /* ---------- Helper Functions ---------- */
-uint8_t parseProcessorStatus(const cpu6502 *const cpu);
-void unparseProcessorStatus(cpu6502 *const cpu, const uint8_t status);
 int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-
-void incStack(cpu6502 *const cpu);
-void decStack(cpu6502 *const cpu);
 
 /* ---------- Flag functions ---------- */
 void bitwiseOpFlags(cpu6502 *const cpu, uint8_t comp);
