@@ -510,7 +510,7 @@ namespace Instructions
     void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         //In order to return correct address, subtract by cpu->memory to eliminate arbitrary memory placement
-        cpu->pc.val = static_cast<uint16_t>(offsetByMode(cpu, opcode, mode) - cpu->memory);
+        cpu->pc.val = static_cast<uint16_t>(offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
     }
 
     void JSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
@@ -519,7 +519,7 @@ namespace Instructions
         cpu->pc.val++;
         
         //Gets correct address by subtracting where cpu->memory begins
-        uint16_t offset = (offsetByMode(cpu, opcode, mode) - cpu->memory);
+        uint16_t offset = (offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
         
         //Load program counter onto stack
         cpu->memory[cpu->s] = static_cast<uint8_t>(cpu->pc.hi);

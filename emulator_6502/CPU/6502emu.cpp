@@ -13,16 +13,45 @@
 #include <iostream>
 #include <stdint.h>
 
-cpu6502::cpu6502()
+/* ---------- MEMORY IMPLEMENTATION ---------- */
+
+cpu6502::Memory::Memory(): data(std::make_unique<uint8_t[]>(0xFFFF)) {}
+
+uint8_t& cpu6502::Memory::operator[](size_t index) 
 {
-    memory = static_cast<uint8_t*>(calloc(0x10000, sizeof(uint8_t)));
-    ps.i = 1;
-    s = 0xff;
+    if (index >= 0xFFFF) {
+        throw std::out_of_range("Memory access out of range");
+    }
+    return data[mirroredAddress(index)];
 }
 
-cpu6502::~cpu6502()
+// Const access operator
+const uint8_t& cpu6502::Memory::operator[](size_t index) const 
 {
-    free(memory);
+    if (index >= 0xFFFF) {
+        throw std::out_of_range("Memory access out of range");
+    }
+    return data[mirroredAddress(index)];
+}
+
+uint16_t cpu6502::Memory::mirroredAddress(uint16_t address) const
+{
+    if (address < 0x2000)
+        return address % 0x0800; // CPU Ram is mirrored every 2KB
+    else if (address < 0x4000)
+        return (address % 8) + 0x2000; // PPU Memory mirrored every byte, starting at 0x2000
+    
+    return address;
+}
+
+uint8_t* cpu6502::Memory::getBaseAddress() { return data.get(); }
+
+/* ---------- CPU IMPLEMENTATION ---------- */
+
+cpu6502::cpu6502()
+{
+    ps.i = 1;
+    s = 0xff;
 }
 
 /* ---------- HELPER FUNCTIONS ---------- */
