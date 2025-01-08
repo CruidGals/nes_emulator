@@ -12,6 +12,7 @@
 // Lib includes
 #include "CPU/6502emu.hpp"
 #include "PPU/PPU.hpp"
+#include "screen/gui.hpp"
 
 // SFML includes
 #include <SFML/Graphics.hpp>
@@ -41,7 +42,7 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
 
 int main(int argc, const char * argv[]) 
 {
-    
+    /*
     cpu6502* cpu = new cpu6502();
     
     uint8_t program[] = {
@@ -69,30 +70,16 @@ int main(int argc, const char * argv[])
     std::cout << cycles << std::endl;
     
     delete cpu;
+    */
      
-    /*
-    sf::RenderWindow window(sf::VideoMode({800, 600}), "SFML works!");
-    sf::CircleShape shape(50);
-    shape.setFillColor(sf::Color::Green);
+    GUI game;
 
-    while (window.isOpen()) 
+    while (game.running())
     {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
+        game.update();
 
-        // Clear
-        window.clear();
-        
-        // Draw
-        window.draw(shape);
-        
-        // Update
-        window.display();
+        game.render();
     }
-     */
     
     return 0;
 }

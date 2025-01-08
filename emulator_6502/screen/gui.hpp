@@ -7,16 +7,28 @@
 
 #pragma once
 
+// STD Library includes
 #include <stdio.h>
+#include <chrono>
+#include <thread>
+
+// SFML includes
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
 class GUI {
     // Important variables for screen
-    sf::RenderWindow* window;
-    sf::Event event;
+    sf::RenderWindow window;
+    sf::CircleShape circle;
+    
+    // Clock for handling CPU, PPU timing
     
 public:
+    // Constructors
+    GUI();
+    
+    const bool running() const;
+    
     void update();
     void render();
 };
