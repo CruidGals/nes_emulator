@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include <string>
 
+// LIB includes
+#include "../util/memory.hpp"
+
 enum class InterruptType { BRK, IRQ, RESET, NMI };
 
 /*
@@ -19,37 +22,6 @@ enum class InterruptType { BRK, IRQ, RESET, NMI };
  Contains registers, program counters, and regular 6502 CPU functionality
  */
 class cpu6502 {
-    // Nested memory class specific to the CPU
-    
-    class Memory
-    {
-        std::unique_ptr<uint8_t[]> data;
-        
-    public:
-        Memory();
-        
-        // Access operator
-        uint8_t& operator[](size_t index);
-
-        // Const access operator
-        const uint8_t& operator[](size_t index) const;
-        
-        /*
-         Memory mirroring mimicker:
-         It mimics the act of memory mirroring by returning the mirrored value from the base position than actual position
-         
-         For example:
-            CPU RAM memory is mirrored every 2KB (0x0000 - 0x07FF, 0x0800 - 0x0FFF , ... , 0x17FF - 0x1FFF)
-            A read to address 0x1FFF will yield the value of 0x07FF
-            A read to address 0x0800 will yield the value of 0x0000, etc.
-         */
-        uint16_t mirroredAddress(uint16_t address) const;
-        
-        /*
-         Helper function that grabs the memory address at data[0]
-         */
-        uint8_t* getBaseAddress();
-    };
     
 public:
     uint8_t a;  //Accumulator
@@ -57,7 +29,7 @@ public:
     uint8_t y;  //Y index register
     uint8_t s;  //Stack pointer
     
-    Memory memory; // Memory
+    CPUMemory memory; // Memory
     
     union //Program counter
     {

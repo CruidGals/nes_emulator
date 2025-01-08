@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+// LIB includes
+#include "../util/memory.hpp"
+
 namespace Registers
 {
 /*
@@ -101,7 +104,8 @@ class PPU
     //Internal registers
     struct Registers::CPUMapped regs;
     struct Registers::Internal intRegs;
-    uint8_t *memory;
+    
+    PPUMemory memory;
     
 public:
     // Used to talk between CPU and PPU

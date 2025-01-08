@@ -11,14 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU()
-{
-    memory = static_cast<uint8_t*>(calloc(0x4000, sizeof(uint8_t))); // Allocate 16 KB
-}
-PPU::~PPU()
-{
-    free(memory);
-}
+PPU::PPU() : memory(NametableMirroring::NONE) {}
 
 //Power up function
 void PPU::powerResetState(bool isReset)
