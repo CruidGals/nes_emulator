@@ -12,7 +12,7 @@
 
 class Memory
 {
-    std::unique_ptr<uint8_t[]> data;
+    std::unique_ptr<uint8_t[]> m_data;
     
 public:
     Memory(size_t size);

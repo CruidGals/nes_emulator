@@ -13,14 +13,14 @@
  
  */
 
-Memory::Memory(size_t size): data(std::make_unique<uint8_t[]>(size)) {}
+Memory::Memory(size_t size): m_data(std::make_unique<uint8_t[]>(size)) {}
 
 uint8_t& Memory::operator[](size_t index)
 {
     if (index >= 0xFFFF) {
         throw std::out_of_range("Memory access out of range");
     }
-    return data[mirroredAddress(index)];
+    return m_data[mirroredAddress(index)];
 }
 
 // Const access operator
@@ -29,7 +29,7 @@ const uint8_t& Memory::operator[](size_t index) const
     if (index >= 0xFFFF) {
         throw std::out_of_range("Memory access out of range");
     }
-    return data[mirroredAddress(index)];
+    return m_data[mirroredAddress(index)];
 }
 
 uint16_t Memory::mirroredAddress(uint16_t address) const
@@ -37,7 +37,7 @@ uint16_t Memory::mirroredAddress(uint16_t address) const
     return address; // Base Class Implementation
 }
 
-uint8_t* Memory::getBaseAddress() { return data.get(); }
+uint8_t* Memory::getBaseAddress() { return m_data.get(); }
 
 
 /*
