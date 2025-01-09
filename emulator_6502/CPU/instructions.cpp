@@ -48,20 +48,27 @@ namespace AddressingModeFuncs
         return static_cast<uint16_t>(highByte) << 8 | static_cast<uint16_t>(lowByte);
     }
 
+    /*
+     *  Important change:
+     *
+     *  Previous ex code:   case ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode)]
+     *  New code:           case ABSOLUTE: cpu->memory.getBaseAddress() + AbsoluteOffset(opcode)
+     */
     uint8_t* offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         switch (mode) {
             case ACCUMULATOR: return &cpu->a;
             case IMMEDIATE: return &opcode[1];
-            case ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode)];
-            case ABSOLUTE_INDIRECT: return &cpu->memory[AbsoluteIndirectOffset(cpu, opcode)];
-            case X_INDEXED_ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode, cpu->x)];
-            case Y_INDEXED_ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode, cpu->y)];
-            case ZERO_PAGE: return &cpu->memory[ZPOffset(opcode)];
-            case X_INDEXED_ZERO_PAGE: return &cpu->memory[ZPOffset(opcode, cpu->x)];
-            case Y_INDEXED_ZERO_PAGE: return &cpu->memory[ZPOffset(opcode, cpu->y)];
-            case X_INDEXED_ZERO_PAGE_INDIRECT: return &cpu->memory[XIndexZPIndirectOffset(cpu, opcode)];
-            case ZERO_PAGE_INDIRECT_Y_INDEXED: return &cpu->memory[YIndexZPIndirectOffset(cpu, opcode)];
+            case ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode));
+            case ABSOLUTE_INDIRECT: return cpu->memory.getAbsoluteAddress(AbsoluteIndirectOffset(cpu, opcode));
+            case X_INDEXED_ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->x));
+            case Y_INDEXED_ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->y));
+            case ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode));
+            case X_INDEXED_ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->x));
+            case Y_INDEXED_ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->y));
+            case X_INDEXED_ZERO_PAGE_INDIRECT: return cpu->memory.getAbsoluteAddress(XIndexZPIndirectOffset(cpu, opcode));
+            case ZERO_PAGE_INDIRECT_Y_INDEXED: return cpu->memory.getAbsoluteAddress(YIndexZPIndirectOffset(cpu, opcode));
+                
             case RELATIVE: return &opcode[1];
                 
             default:

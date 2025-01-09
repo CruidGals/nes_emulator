@@ -15,7 +15,7 @@
 
 /* ---------- CPU IMPLEMENTATION ---------- */
 
-cpu6502::cpu6502()
+cpu6502::cpu6502(Memory& mem) : memory(mem)
 {
     ps.i = 1;
     ps._ = 1;
@@ -92,7 +92,7 @@ int cpu6502::emulate()
 {
     using namespace AddressingModeFuncs;
     
-    uint8_t *opcode = &this->memory[this->pc.val];
+    uint8_t *opcode = this->memory.getBaseAddress() + this->pc.val;
     //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(this->pc.val) << std::endl;
     this->pc.val += 1;
     
@@ -585,7 +585,7 @@ void cpu6502::disassemble()
 {
     using namespace AddressingModeFuncs;
     
-    uint8_t *opcode = &this->memory[this->pc.val];
+    uint8_t *opcode = this->memory.getBaseAddress() + this->pc.val;
     this->pc.val += 1;
     
     switch (*opcode)

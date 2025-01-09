@@ -105,15 +105,14 @@ class PPU
     struct Registers::CPUMapped regs;
     struct Registers::Internal intRegs;
     
-    PPUMemory memory;
+    Memory& memory;
     
 public:
     // Used to talk between CPU and PPU
     uint8_t cpuDataBus;
     
     //Constructors Destructors
-    PPU();
-    ~PPU();
+    PPU(Memory& mem);
     
     /*
      Power/Reset function for PPU

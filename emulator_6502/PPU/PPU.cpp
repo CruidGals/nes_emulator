@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU() : memory(NametableMirroring::NONE) {}
+PPU::PPU(Memory& mem) : memory(mem) {}
 
 //Power up function
 void PPU::powerResetState(bool isReset)
@@ -28,16 +28,6 @@ void PPU::powerResetState(bool isReset)
         regs.OAMADDR = 0;
         regs.PPUADDR.val = 0;
     }
-}
-
-// Overload operator[] for read-only access (const)
-const uint8_t& PPU::operator[](uint16_t address) const 
-{
-    if (address >= 0x4000) 
-    {
-        throw std::out_of_range("Attempted to access beyond PPU memory bounds");
-    }
-    return memory[address];
 }
 
 /* --------------- READ WRITE FUNCTIONS ---------------*/

@@ -29,7 +29,7 @@ public:
     uint8_t y;  //Y index register
     uint8_t s;  //Stack pointer
     
-    CPUMemory memory; // Memory
+    Memory& memory; // Memory
     
     union //Program counter
     {
@@ -59,7 +59,7 @@ public:
     
     /* ---------- CONSTRUCTORS AND DESTRUCTORS ----------*/
     
-    cpu6502();
+    cpu6502(Memory& mem);
     
     /* ---------- FUNCTIONS ---------- */
     

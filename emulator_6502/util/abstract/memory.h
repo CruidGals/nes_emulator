@@ -73,6 +73,11 @@ public:
         return m_data.get();
     }
     
+    uint8_t* getAbsoluteAddress(uint16_t address)
+    {
+        return getBaseAddress() + address;
+    }
+    
     /*
      Memory mirroring mimicker:
      It mimics the act of memory mirroring by returning the mirrored value from the base position than actual position

@@ -14,6 +14,9 @@
 #include "PPU/PPU.hpp"
 #include "screen/gui.hpp"
 
+#include "util/cpumem.hpp"
+#include "util/ppumem.hpp"
+
 // SFML includes
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -33,7 +36,7 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
     file.seekg(0, std::ios::beg);
     
     //Set position at start of list and read file into memory
-    file.read(reinterpret_cast<char*>(&cpu->memory[offset]), size);
+    file.read(reinterpret_cast<char*>(cpu->memory.getAbsoluteAddress(offset)), size);
     if(!file)
     {
         throw std::runtime_error("Could not read entire file");
@@ -42,8 +45,10 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
 
 int main(int argc, const char * argv[]) 
 {
-    
-    cpu6502* cpu = new cpu6502();
+    PPUMemory* ppuMem = new PPUMemory(NametableMirroring::NONE);
+    PPU* ppu = new PPU(*ppuMem);
+    CPUMemory* cpuMem = new CPUMemory(ppu);
+    cpu6502* cpu = new cpu6502(*cpuMem);
     
     uint8_t program[] = {
         0x38, 0x90, 0x02, 0xA2, 0x04, 0xA9, 0x01, 0xC8
@@ -70,6 +75,9 @@ int main(int argc, const char * argv[])
     std::cout << cycles << std::endl;
     
     delete cpu;
+    delete cpuMem;
+    delete ppu;
+    delete ppuMem;
     
     /*
     GUI game;
