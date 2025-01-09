@@ -1,68 +1,11 @@
 //
-//  memory.cpp
+//  ppumem.cpp
 //  emulator_6502
 //
-//  Created by Kyle Chiem on 1/7/25.
+//  Created by Kyle Chiem on 1/9/25.
 //
 
-#include "memory.hpp"
-
-/*
- 
- Base memory class. Used to implement CPUMemory and PPUMemory
- 
- */
-
-Memory::Memory(size_t size): m_data(std::make_unique<uint8_t[]>(size)) {}
-
-uint8_t& Memory::operator[](size_t index)
-{
-    if (index >= 0xFFFF) {
-        throw std::out_of_range("Memory access out of range");
-    }
-    return m_data[mirroredAddress(index)];
-}
-
-// Const access operator
-const uint8_t& Memory::operator[](size_t index) const
-{
-    if (index >= 0xFFFF) {
-        throw std::out_of_range("Memory access out of range");
-    }
-    return m_data[mirroredAddress(index)];
-}
-
-uint16_t Memory::mirroredAddress(uint16_t address) const
-{
-    return address; // Base Class Implementation
-}
-
-uint8_t* Memory::getBaseAddress() { return m_data.get(); }
-
-
-/*
- 
- CPU-Specific Memory class
- 
- */
-
-CPUMemory::CPUMemory() : Memory(0xFFFF) {}
-
-uint16_t CPUMemory::mirroredAddress(uint16_t address) const
-{
-    if (address < 0x2000)
-        return address % 0x0800; // CPU Ram is mirrored every 2KB
-    else if (address < 0x4000)
-        return (address % 8) + 0x2000; // PPU Memory mirrored every byte, starting at 0x2000
-    
-    return address;
-}
-
-/*
- 
- PPU-Specific Memory class
- 
- */
+#include "ppumem.hpp"
 
 PPUMemory::PPUMemory(NametableMirroring type) : Memory(0xFFFF), mirroringType(type) {}
 
@@ -71,7 +14,8 @@ uint16_t PPUMemory::mirroredAddress(uint16_t address) const
     
     if (address >= 0x2000 && address < 0x3000) // Handles nametable mirroring
     {
-        switch (mirroringType) {
+        switch (mirroringType)
+        {
             case NametableMirroring::SINGLE:
             {
                 return (address % 0x0400) + 0x2000;

@@ -12,7 +12,7 @@
 #include <string>
 
 // LIB includes
-#include "../util/memory.hpp"
+#include "../util/cpumem.hpp"
 
 enum class InterruptType { BRK, IRQ, RESET, NMI };
 

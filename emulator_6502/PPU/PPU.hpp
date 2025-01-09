@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 // LIB includes
-#include "../util/memory.hpp"
+#include "../util/ppumem.hpp"
 
 namespace Registers
 {

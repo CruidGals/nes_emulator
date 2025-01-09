@@ -42,7 +42,7 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
 
 int main(int argc, const char * argv[]) 
 {
-    /*
+    
     cpu6502* cpu = new cpu6502();
     
     uint8_t program[] = {
@@ -70,8 +70,8 @@ int main(int argc, const char * argv[])
     std::cout << cycles << std::endl;
     
     delete cpu;
-    */
-     
+    
+    /*
     GUI game;
 
     while (game.running())
@@ -82,4 +82,5 @@ int main(int argc, const char * argv[])
     }
     
     return 0;
+     */
 }
