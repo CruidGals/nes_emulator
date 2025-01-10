@@ -43,6 +43,252 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
     }
 }
 
+void drawMario(GUI* gui)
+{
+    struct Pixel background = {107, 139, 255};
+    struct Pixel clothes = {177, 52, 37};
+    struct Pixel hair = {106, 107, 4};
+    struct Pixel skin = {227, 157, 37};
+    
+    int y = 0;
+    
+    // Line 1
+    for (int i = 0; i < 12; i++)
+    {
+        gui->drawPixel(i, y, background);
+    }
+    
+    y++;
+    
+    // Line 2
+    for (int i = 0; i < 12; i++)
+    {
+        if (i > 2 && i < 8)
+            gui->drawPixel(i, y, clothes);
+        else
+            gui->drawPixel(i, y, background);
+    }
+    
+    // Line 3
+    
+    y++;
+    for (int i = 0; i < 12; i++)
+    {
+        if (i > 1 && i < 11)
+            gui->drawPixel(i, y, clothes);
+        else
+            gui->drawPixel(i, y, background);
+    }
+    
+    // Line 4
+    
+    y++;
+    int i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 5
+    
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 6
+    
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    
+    // Line 7
+    
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 8
+    
+    y++;
+    for (int j = 0; j < 12; j++)
+    {
+        if (j > 2 && j < 10)
+            gui->drawPixel(j, y, skin);
+        else
+            gui->drawPixel(j, y, background);
+    }
+    
+    // Line 9
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 10
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 11
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    
+    // Line 12
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, skin);
+    gui->drawPixel(i++, y, skin);
+    
+    // Line 13
+    
+    y++;
+    for (int j = 0; j < 12; j++)
+    {
+        if (j > 2 && j < 9)
+            gui->drawPixel(j, y, clothes);
+        else
+            gui->drawPixel(j, y, skin);
+    }
+    
+    // Line 14
+    
+    y++;
+    for (int j = 0; j < 12; j++)
+    {
+        if (j > 1 && j < 10)
+            gui->drawPixel(j, y, clothes);
+        else
+            gui->drawPixel(j, y, skin);
+    }
+    
+    // Line 15
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, clothes);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    
+    // Line 16
+    
+    y++;
+    i = 0;
+    
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, background);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, hair);
+    gui->drawPixel(i++, y, background);
+}
+
 int main(int argc, const char * argv[]) 
 {
     /*
@@ -86,14 +332,7 @@ int main(int argc, const char * argv[])
     */
     
     GUI game;
-    
-    
-    struct Pixel pixel = {255, 255, 255};
-    
-    for (int i = 100; i < 110; ++i)
-    {
-        game.drawPixel(100, i, pixel);
-    }
+    drawMario(&game);
 
     while (game.running())
     {
