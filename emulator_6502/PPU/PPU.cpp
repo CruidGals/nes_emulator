@@ -11,7 +11,10 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU(Memory& mem) : memory(mem) {}
+PPU::PPU(Memory& mem) : memory(mem) 
+{
+    loadPaletteFile("./res/Composite_wiki.pal");
+}
 
 //Power up function
 void PPU::powerResetState(bool isReset)
@@ -105,5 +108,38 @@ void PPU::write(uint16_t addr, uint8_t result)
     
         default:
             break;
+    }
+}
+
+/* --------- PRIVATE FUNCTIONS --------- */
+
+void PPU::loadPaletteFile(const char* filename)
+{
+    FILE* file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Error opening file");
+        return;
+    }
+    
+    struct RGBField palette[64];
+    auto read = fread(palette, sizeof(RGBField), 64, file);
+    
+    if (read != 64) // .pal always reads 64 lines (64 colors)
+    {
+        perror("Invalid palette file!");
+        fclose(file);
+        return;
+    }
+    
+    COLOR_PALETTE = std::to_array(palette);
+    fclose(file);
+}
+
+void PPU::printPalette() const
+{
+    for (const auto& m : COLOR_PALETTE)
+    {
+        printf("First color: R=%u, G=%u, B=%u\n", m.r, m.g, m.b);
     }
 }

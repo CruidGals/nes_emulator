@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <array>
 
 // LIB includes
 #include "../util/ppumem.hpp"
@@ -99,8 +100,18 @@ struct Internal
 
 } // namespace Registers
 
+struct RGBField
+{
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
 class PPU
 {
+    // Internal color palette
+    std::array<struct RGBField, 64> COLOR_PALETTE;
+    
     //Internal registers
     struct Registers::CPUMapped regs;
     struct Registers::Internal intRegs;
@@ -127,6 +138,13 @@ public:
     //PPU Memory write functions
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t result);
+    
+    /**
+     *  Loads a color palette file into the color palette variable.
+     *
+     *  @param filename File which to read the palette from. Must be a .pal file.
+     */
+    void loadPaletteFile(const char* filename);
 };
 
 #endif /* PPU_hpp */
