@@ -62,6 +62,7 @@
 		27E4B05F2D30548E0018AEED /* cpumem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cpumem.hpp; sourceTree = "<group>"; };
 		27E4B0612D3054980018AEED /* ppumem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ppumem.cpp; sourceTree = "<group>"; };
 		27E4B0622D3054980018AEED /* ppumem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ppumem.hpp; sourceTree = "<group>"; };
+		27E4B0652D3176E30018AEED /* Composite_wiki.pal */ = {isa = PBXFileReference; lastKnownFileType = file; path = Composite_wiki.pal; sourceTree = "<group>"; };
 		27F3A9DA2CC01D5700929760 /* emulator_6502 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = emulator_6502; sourceTree = BUILT_PRODUCTS_DIR; };
 		27F3A9DD2CC01D5700929760 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		27F3A9E42CC01F4C00929760 /* 6502emu.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 6502emu.cpp; sourceTree = "<group>"; };
@@ -164,6 +165,14 @@
 			path = abstract;
 			sourceTree = "<group>";
 		};
+		27E4B0642D3176D50018AEED /* res */ = {
+			isa = PBXGroup;
+			children = (
+				27E4B0652D3176E30018AEED /* Composite_wiki.pal */,
+			);
+			path = res;
+			sourceTree = "<group>";
+		};
 		27F3A9D12CC01D5700929760 = {
 			isa = PBXGroup;
 			children = (
@@ -184,6 +193,7 @@
 		27F3A9DC2CC01D5700929760 /* emulator_6502 */ = {
 			isa = PBXGroup;
 			children = (
+				27E4B0642D3176D50018AEED /* res */,
 				27F3A9DD2CC01D5700929760 /* main.cpp */,
 				27E4B0442D28B89E0018AEED /* screen */,
 				27114B232CEEC620008B30D1 /* roms */,

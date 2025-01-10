@@ -135,11 +135,3 @@ void PPU::loadPaletteFile(const char* filename)
     COLOR_PALETTE = std::to_array(palette);
     fclose(file);
 }
-
-void PPU::printPalette() const
-{
-    for (const auto& m : COLOR_PALETTE)
-    {
-        printf("First color: R=%u, G=%u, B=%u\n", m.r, m.g, m.b);
-    }
-}

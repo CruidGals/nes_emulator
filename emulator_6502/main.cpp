@@ -45,16 +45,21 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
 
 int main(int argc, const char * argv[]) 
 {
+    /*
     PPUMemory* ppuMem = new PPUMemory(NametableMirroring::NONE);
     PPU* ppu = new PPU(*ppuMem);
     CPUMemory* cpuMem = new CPUMemory(ppu);
     cpu6502* cpu = new cpu6502(*cpuMem);
     
     uint8_t program[] = {
-        0x38, 0x90, 0x02, 0xA2, 0x04, 0xA9, 0x01, 0xC8
+        0xA9, 0x00,        // LDA #$00
+        0x8D, 0x00, 0x02,  // STA $0200
+        0xEE, 0x00, 0x02,  // INC $0200
+        0xAD, 0x00, 0x02,  // LDA $0200
+        0x4C, 0x05, 0x02   // JMP LOOP (to $0203)
     };
     
-    int counter { 0 };
+    uint16_t counter { 0x200 };
     
     for (auto const opcode : program)
     {
@@ -64,10 +69,10 @@ int main(int argc, const char * argv[])
     
     //std::string filepath = "./roms/Donkey Kong (Japan).nes";
     //readFile(cpu, filepath, 0x8000);
-    cpu->pc.val = 0;
+    cpu->pc.val = 0x200;
     int cycles = 0;
     
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 100; i++)
     {
         cycles += cpu->emulate();
     }
@@ -78,17 +83,24 @@ int main(int argc, const char * argv[])
     delete cpuMem;
     delete ppu;
     delete ppuMem;
+    */
     
-    /*
     GUI game;
+    
+    
+    struct Pixel pixel = {255, 255, 255};
+    
+    for (int i = 100; i < 110; ++i)
+    {
+        game.drawPixel(100, i, pixel);
+    }
 
     while (game.running())
     {
         game.update();
-
         game.render();
     }
     
+    
     return 0;
-     */
 }
