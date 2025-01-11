@@ -113,8 +113,8 @@ class PPU
     std::array<struct RGBField, 64> COLOR_PALETTE;
     
     //Internal registers
-    struct Registers::CPUMapped regs;
-    struct Registers::Internal intRegs;
+    struct Registers::CPUMapped m_regs; // Completely remove this later
+    struct Registers::Internal m_intRegs;
     
     Memory& memory;
     
@@ -135,9 +135,25 @@ public:
     // Overload operator[] for memory access (read only)
     const uint8_t& operator[](uint16_t address) const;
     
-    //PPU Memory write functions
+    //PPU Memory read/write functions
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t result);
+    
+    // Write helper functions
+    void writePPUScroll(uint8_t result);
+    void writePPUAddr(uint8_t result);
+    void writePPUData(uint8_t result);
+    
+    // Other helper functions
+    
+    /**
+     *  When the fine Y value of internal register v is incremented, it has the following implications on coarse Y and nametable Select:
+     *  - If fine Y is greater than 7 and incremented, it's value will overflow into the coarse Y variable.
+     *  - If coarse Y is equal to 29, the vertical nametable (bit 11 of internal register v) will toggle. Coarse Y is set to 0.
+     *  - If coarse Y is equal to 31, the vertical nametable will not toggle. Coarse Y is set to 0.
+     *  - Otherwise, coarse Y is set incremented.
+     */
+    void fineYIncrement();
     
     /**
      *  Loads a color palette file into the color palette variable.

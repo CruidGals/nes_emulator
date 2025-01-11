@@ -19,17 +19,17 @@ PPU::PPU(Memory& mem) : memory(mem)
 //Power up function
 void PPU::powerResetState(bool isReset)
 {
-    regs.PPUCTRL.val = 0;
-    regs.PPUMASK.val = 0;
-    regs.PPUSTATUS.val = (isReset) ? regs.PPUSTATUS.val | 0x80 : 0xa0;
-    regs.PPUSCROLL = 0;
-    regs.PPUDATA = 0;
+    m_regs.PPUCTRL.val = 0;
+    m_regs.PPUMASK.val = 0;
+    m_regs.PPUSTATUS.val = (isReset) ? m_regs.PPUSTATUS.val | 0x80 : 0xa0;
+    m_regs.PPUSCROLL = 0;
+    m_regs.PPUDATA = 0;
     
     // Registers that are only changed by Power on events
     if (!isReset)
     {
-        regs.OAMADDR = 0;
-        regs.PPUADDR.val = 0;
+        m_regs.OAMADDR = 0;
+        m_regs.PPUADDR.val = 0;
     }
 }
 
@@ -40,15 +40,15 @@ uint8_t PPU::read(uint16_t addr)
     
     switch (addr) {
         case 0x2002: // PPUSTATUS
-            readValue = regs.PPUSTATUS.val;
-            regs.PPUSTATUS.V = 0;   // Clear V-Blank flag
-            intRegs.w = 0;          // Side effect
+            readValue = m_regs.PPUSTATUS.val;
+            m_regs.PPUSTATUS.V = 0;   // Clear V-Blank flag AFTER being read
+            m_intRegs.w = 0;          // Side effect
             break;
         case 0x2004: // OAMDATA
-            readValue = regs.OAMDATA;
+            return m_regs.OAMDATA;
             break;
         case 0x2007: // PPUDATA
-            readValue = regs.PPUDATA;
+            return memory[m_intRegs.v.val];
             break;
         
         default:
@@ -63,45 +63,28 @@ void PPU::write(uint16_t addr, uint8_t result)
 {
     switch (addr) {
         case 0x2000: // PPUCTRL
-            regs.PPUSTATUS.val = result;
-            intRegs.w = 0; // Side effect
+            m_regs.PPUCTRL.val = result;
+            m_intRegs.t.nametable = (result & 0x03); // t: ...GH.. ........ <- d: ......GH
             break;
         case 0x2001: // PPUMASK
-            cpuDataBus = regs.OAMDATA;
-            //TODO -- After power/reset, writes are ignored until first pre-render scanline
+            m_regs.PPUMASK.val = result;
             break;
         case 0x2003: // OAMADDR
-            regs.OAMADDR = result;
+            m_regs.OAMADDR = result;
             break;
         case 0x2004: // OAMDATA
-            regs.OAMDATA = result;
-            regs.OAMADDR++;         // OAMADDR Increments after every write
+            m_regs.OAMDATA = result;
+            m_regs.OAMADDR++;         // OAMADDR Increments after every write
             break;
-        case 0x2005: {// PPUSCROLL
-            regs.PPUSCROLL = result;
-            // TODO -- do something with the data depending on what write register it is
-            intRegs.w = ~intRegs.w; // Toggle the w bit
-        }   break;
-        case 0x2006: { // PPUADDR
-            if (intRegs.w)
-                regs.PPUADDR.lo = result;   // Write to low byte (w = 1)
-            else
-                regs.PPUADDR.hi = result;   // Write to high byte (w = 0)
-            
-            intRegs.w = ~intRegs.w; //Toggle w bit
-            
-            // TODO -- do some work on the temporary VRAM address thing
-        }
+        case 0x2005: // PPUSCROLL
+            writePPUScroll(result);
             break;
-        case 0x2007: {// PPUDATA
-            regs.PPUDATA = result;
-            
-            if (regs.PPUCTRL.I)
-                regs.PPUADDR.val += 0x20;
-            else
-                regs.PPUADDR.val += 1;
-            
-        }   break;
+        case 0x2006: // PPUADDR
+            writePPUAddr(result);
+            break;
+        case 0x2007: // PPUDATA
+            writePPUData(result);
+            break;
         case 0x4014: // OAMDMA
             // TODO -- Implement later
             break;
@@ -110,6 +93,94 @@ void PPU::write(uint16_t addr, uint8_t result)
             break;
     }
 }
+
+/* --------- WRITE HELPER FUNCTIONS --------- */
+
+void PPU::writePPUScroll(uint8_t result)
+{
+    m_regs.PPUSCROLL = result;
+    
+    if (!m_intRegs.w) // m_intRegs.w == 0
+    {
+        m_intRegs.t.coarseX = (result >> 3);
+        m_intRegs.x = (result & 0x08);
+    }
+    else              // m_intRegs.w == 1
+    {
+        m_intRegs.t.coarseY = (result >> 3);
+        m_intRegs.t.fineY = (result & 0x08);
+    }
+    
+    // Toggle after every write
+    m_intRegs.w = ~m_intRegs.w;
+}
+
+void PPU::writePPUAddr(uint8_t result)
+{
+    if (!m_intRegs.w)   // m_intRegs.w == 0
+    {
+        m_regs.PPUADDR.hi = result;            // d: ABCDEFGH
+        uint16_t truncatedResult = result & 0x3F; // t: .CDEFGH ........ <- d: ..CDEFGH
+        m_intRegs.t.val = truncatedResult << 8 | (m_intRegs.t.val & 0xFF); // Move into higher byte
+    }
+    else                // m_intRegs.w == 1
+    {
+        m_regs.PPUADDR.lo = result;
+        m_intRegs.t.val = (m_intRegs.t.val & 0xFF00) | result; // t: ....... ABCDEFGH <- d: ABCDEFGH
+        m_intRegs.v.val = m_intRegs.t.val;  // Transfer to the v register (b/c t is temp register)
+    }
+    
+    // Toggle after every write
+    m_intRegs.w = ~m_intRegs.w;
+}
+
+void PPU::writePPUData(uint8_t result)
+{
+    m_regs.PPUDATA = result;
+    memory[m_intRegs.v.val] = result;
+    
+    if (m_regs.PPUCTRL.I)
+    {
+        m_regs.PPUADDR.val += 0x20;
+        m_intRegs.v.val += 0x20;
+    }
+    else
+    {
+        m_regs.PPUADDR.val++;
+        m_intRegs.v.val++;
+    }
+    
+}
+
+/* ---------- Other Helper Functions ---------- */
+
+void PPU::fineYIncrement()
+{
+    // Increment normally if fineY != 7 (does not overflow)
+    if (m_intRegs.v.fineY < 7)
+    {
+        m_intRegs.v.fineY++;
+        return;
+    }
+    
+    // Case that fineY does overflow, goes into coarse Y
+    m_intRegs.v.fineY = 0;
+    
+    if (m_intRegs.v.coarseY == 29)
+    {
+        m_intRegs.v.coarseY = 0;    // Simulate overflow
+        m_intRegs.v.nametable ^= 1; // Toggle vertical nametable
+    }
+    else if (m_intRegs.v.coarseY == 31)
+    {
+        m_intRegs.v.coarseY = 0;    // Simulate overflow, but don't toggle vertical nametable
+    }
+    else
+    {
+        m_intRegs.v.coarseY++;      // Act as normal overflow
+    }
+}
+
 
 /* --------- PRIVATE FUNCTIONS --------- */
 

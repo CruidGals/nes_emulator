@@ -45,7 +45,7 @@ void readFile(cpu6502 *const cpu, const std::string_view filename, uint32_t offs
 
 void drawMario(GUI* gui)
 {
-    struct Pixel background = {107, 139, 255};
+    struct Pixel background = {0, 0, 0};
     struct Pixel clothes = {177, 52, 37};
     struct Pixel hair = {106, 107, 4};
     struct Pixel skin = {227, 157, 37};
