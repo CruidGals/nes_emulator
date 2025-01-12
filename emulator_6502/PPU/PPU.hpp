@@ -14,6 +14,7 @@
 
 // LIB includes
 #include "../util/ppumem.hpp"
+#include "palette.hpp"
 
 namespace Registers
 {
@@ -100,17 +101,10 @@ struct Internal
 
 } // namespace Registers
 
-struct RGBField
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-};
-
 class PPU
 {
     // Internal color palette
-    std::array<struct RGBField, 64> COLOR_PALETTE;
+    Palette palette;
     
     //Internal registers
     struct Registers::CPUMapped m_regs; // Completely remove this later
@@ -154,13 +148,6 @@ public:
      *  - Otherwise, coarse Y is set incremented.
      */
     void fineYIncrement();
-    
-    /**
-     *  Loads a color palette file into the color palette variable.
-     *
-     *  @param filename File which to read the palette from. Must be a .pal file.
-     */
-    void loadPaletteFile(const char* filename);
 };
 
 #endif /* PPU_hpp */

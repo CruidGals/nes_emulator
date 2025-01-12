@@ -22,6 +22,7 @@
 		27E4B04D2D29A5720018AEED /* instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B04B2D29A5720018AEED /* instructions.cpp */; };
 		27E4B0602D30548E0018AEED /* cpumem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B05E2D30548E0018AEED /* cpumem.cpp */; };
 		27E4B0632D3054980018AEED /* ppumem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B0612D3054980018AEED /* ppumem.cpp */; };
+		27E4B0682D337F500018AEED /* palette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B0662D337F500018AEED /* palette.cpp */; };
 		27F3A9DE2CC01D5700929760 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9DD2CC01D5700929760 /* main.cpp */; };
 		27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9E42CC01F4C00929760 /* 6502emu.cpp */; };
 /* End PBXBuildFile section */
@@ -63,6 +64,8 @@
 		27E4B0612D3054980018AEED /* ppumem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ppumem.cpp; sourceTree = "<group>"; };
 		27E4B0622D3054980018AEED /* ppumem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ppumem.hpp; sourceTree = "<group>"; };
 		27E4B0652D3176E30018AEED /* Composite_wiki.pal */ = {isa = PBXFileReference; lastKnownFileType = file; path = Composite_wiki.pal; sourceTree = "<group>"; };
+		27E4B0662D337F500018AEED /* palette.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = palette.cpp; sourceTree = "<group>"; };
+		27E4B0672D337F500018AEED /* palette.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = palette.hpp; sourceTree = "<group>"; };
 		27F3A9DA2CC01D5700929760 /* emulator_6502 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = emulator_6502; sourceTree = BUILT_PRODUCTS_DIR; };
 		27F3A9DD2CC01D5700929760 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		27F3A9E42CC01F4C00929760 /* 6502emu.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 6502emu.cpp; sourceTree = "<group>"; };
@@ -103,6 +106,8 @@
 			children = (
 				27114B212CED36BC008B30D1 /* PPU.hpp */,
 				27114B202CED36BC008B30D1 /* PPU.cpp */,
+				27E4B0662D337F500018AEED /* palette.cpp */,
+				27E4B0672D337F500018AEED /* palette.hpp */,
 			);
 			path = PPU;
 			sourceTree = "<group>";
@@ -264,6 +269,7 @@
 				27E4B0602D30548E0018AEED /* cpumem.cpp in Sources */,
 				27114B222CED36BC008B30D1 /* PPU.cpp in Sources */,
 				27E4B0472D28B8C30018AEED /* gui.cpp in Sources */,
+				27E4B0682D337F500018AEED /* palette.cpp in Sources */,
 				27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */,
 				27F3A9DE2CC01D5700929760 /* main.cpp in Sources */,
 				27E4B04D2D29A5720018AEED /* instructions.cpp in Sources */,
