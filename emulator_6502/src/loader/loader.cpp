@@ -24,7 +24,7 @@ Loader::Loader(const char* filename)
         
         if (!successfulLoad)
         {
-            throw std::runtime_error("Could not load the rom");
+            throw std::runtime_error("Incorrect file.");
         }
         
         file.close();
@@ -94,9 +94,11 @@ void Loader::loadHeader()
         return;
     }
     
-    // ------ Set PRG and CHR Rom sizes (in 16 KiB units)
+    // ------ Set PRG and CHR Rom & Ram sizes
     m_header.prgRomSize = (static_cast<uint16_t>(headerBytes[9] & 0x0F) << 8) | headerBytes[4];
     m_header.chrRomSize = (static_cast<uint16_t>(headerBytes[9] >> 4) << 8) | headerBytes[5];
+    m_header.prgRamSize.val = headerBytes[10];
+    m_header.chrRamSize.val = headerBytes[11];
     
     // ------ Set the mapper & submapper number - Found in header bytes 6 - 8
     m_header.mapperNumber = (static_cast<uint16_t>(headerBytes[8] & 0x0F) << 8 ) | (headerBytes[6] >> 4 | (headerBytes[7] & 0xF0));

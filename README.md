@@ -13,8 +13,9 @@ Contains emulation of the MOS 6502 CPU and (soon) the machine hardware of the or
 
 ## TO-DO List
 
-- Link the read and write PPU operations with its internal registers
+- Make some common mappers to try and run some simple games
 - Just make something appear on the screen when the CPU writes to it
+- Implement code to deal with the miscellanous roms in a .nes file
 - Learn NES hardware, especially the architecture that connects the PPU and CPU together.
 - At least make it able to run Donkey Kong
 

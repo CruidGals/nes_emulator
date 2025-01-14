@@ -24,9 +24,19 @@ struct Header
         uint8_t val;
     } format;
     
-    // Defines the size of prg and chr Rom
+    // Defines the size of prg and chr Rom & Ram
     uint16_t prgRomSize : 12;
     uint16_t chrRomSize : 12;
+    
+    union
+    {
+        struct
+        {
+            unsigned volatileRam;
+            unsigned nonVolatile;
+        };
+        uint8_t val;
+    } prgRamSize, chrRamSize;
     
     // This union contains mapper + submapper number
     uint16_t mapperNumber : 12;
