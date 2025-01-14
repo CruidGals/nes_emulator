@@ -25,6 +25,7 @@
 		27E4B0682D337F500018AEED /* palette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27E4B0662D337F500018AEED /* palette.cpp */; };
 		27F3A9DE2CC01D5700929760 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9DD2CC01D5700929760 /* main.cpp */; };
 		27F3A9E62CC01F4C00929760 /* 6502emu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3A9E42CC01F4C00929760 /* 6502emu.cpp */; };
+		27F409342D36029100CF0BEB /* loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F409322D36029100CF0BEB /* loader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -70,6 +71,9 @@
 		27F3A9DD2CC01D5700929760 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		27F3A9E42CC01F4C00929760 /* 6502emu.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = 6502emu.cpp; sourceTree = "<group>"; };
 		27F3A9E52CC01F4C00929760 /* 6502emu.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = 6502emu.hpp; sourceTree = "<group>"; };
+		27F409322D36029100CF0BEB /* loader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = loader.cpp; sourceTree = "<group>"; };
+		27F409332D36029100CF0BEB /* loader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = loader.hpp; sourceTree = "<group>"; };
+		27F4093D2D36085E00CF0BEB /* rom_params.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rom_params.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +108,7 @@
 		27A1B4172D34D1E10022235F /* src */ = {
 			isa = PBXGroup;
 			children = (
+				27F409362D36051000CF0BEB /* loader */,
 				27F3A9DD2CC01D5700929760 /* main.cpp */,
 				27E4B0442D28B89E0018AEED /* screen */,
 				27E4B02B2D27ACB50018AEED /* PPU */,
@@ -217,6 +222,16 @@
 			path = emulator_6502;
 			sourceTree = "<group>";
 		};
+		27F409362D36051000CF0BEB /* loader */ = {
+			isa = PBXGroup;
+			children = (
+				27F409332D36029100CF0BEB /* loader.hpp */,
+				27F409322D36029100CF0BEB /* loader.cpp */,
+				27F4093D2D36085E00CF0BEB /* rom_params.hpp */,
+			);
+			path = loader;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -275,6 +290,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				27E4B0602D30548E0018AEED /* cpumem.cpp in Sources */,
+				27F409342D36029100CF0BEB /* loader.cpp in Sources */,
 				27114B222CED36BC008B30D1 /* PPU.cpp in Sources */,
 				27E4B0472D28B8C30018AEED /* gui.cpp in Sources */,
 				27E4B0682D337F500018AEED /* palette.cpp in Sources */,
