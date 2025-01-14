@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU(Memory& mem) : memory(mem), palette("./res/Composite_wiki.pal") {}
+PPU::PPU(Memory& mem) : memory(mem), palette("../../res/Composite_wiki.pal") {}
 
 //Power up function
 void PPU::powerResetState(bool isReset)
