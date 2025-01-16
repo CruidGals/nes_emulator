@@ -7,7 +7,7 @@
 
 #include "loader.hpp"
 
-Loader::Loader(const char* filename)
+Loader::Loader(const char* filename) : successfulLoad(true)
 {
     // Open the file in binary mode to read byte by byte.
     try
@@ -27,11 +27,13 @@ Loader::Loader(const char* filename)
             throw std::runtime_error("Incorrect file.");
         }
         
+        std::cout << "Loaded ROM successfully" << std::endl;
+        
         file.close();
     } 
     catch (const std::runtime_error& e)
     {
-        std::cerr << "Runtime exception occured:" << e.what() << std::endl;
+        std::cerr << "Runtime exception occured: " << e.what() << std::endl;
         
         if (!file.is_open())
         {
@@ -127,10 +129,13 @@ void Loader::loadRomData()
     if (!successfulLoad) // Invalid header file described by above function
         return;
     
-    // Load the 512 bytes into the trainer array
-    for (int i = 0; i < 512; ++i)
+    if (m_header.flags.T) // If there is a trainer
     {
-        m_romData.trainer[i] = readByte();
+        // Load the 512 bytes into the trainer array
+        for (int i = 0; i < 512; ++i)
+        {
+            m_romData.trainer[i] = readByte();
+        }
     }
     
     // Load the prgRomSize number of bytes into PRG ROM memory
@@ -155,9 +160,12 @@ void Loader::loadRomData()
 uint8_t Loader::readByte()
 {
     char byte;
-    if (file.read(&byte, sizeof(byte))) {
+    if (file.read(&byte, sizeof(byte))) 
+    {
         return static_cast<uint8_t>(static_cast<unsigned char>(byte));
-    } else {
+    } 
+    else
+    {
         throw std::runtime_error("Failed to read from the file or end of file reached.");
     }
 }

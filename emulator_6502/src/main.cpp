@@ -13,6 +13,7 @@
 #include "CPU/6502emu.hpp"
 #include "PPU/PPU.hpp"
 #include "screen/gui.hpp"
+#include "loader/loader.hpp"
 
 #include "util/cpumem.hpp"
 #include "util/ppumem.hpp"
@@ -331,6 +332,7 @@ int main(int argc, const char * argv[])
     delete ppuMem;
     */
     
+    /*
     GUI game;
     drawMario(&game);
 
@@ -339,6 +341,10 @@ int main(int argc, const char * argv[])
         game.update();
         game.render();
     }
+    */
+    
+    Loader loader("/Users/kylechiem/Documents/VSCode Projects/c++/xcodejawn/emulator_6502/emulator_6502/roms/Donkey Kong (Japan).nes");
+    
     
     
     return 0;
