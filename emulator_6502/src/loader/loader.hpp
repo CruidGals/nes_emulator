@@ -19,18 +19,23 @@ class Loader
     // Store the open file in variable to easy access
     std::ifstream file;
     
-    struct Header m_header;
-    struct RomData m_romData;
+    std::unique_ptr<Header> m_header;
+    std::unique_ptr<RomData> m_romData;
+    
+    bool m_romLoaded;
     
 public:
     
     // Constructor
-    Loader(const char* filename);
+    Loader();
     
     int getPrgRomSize() const;
     int getChrRomSize() const;
     
-    bool successfulLoad;
+    const bool isLoaded() const;
+    
+    void loadRom(const char* filename);
+    void clearRom();
     
 private:
     
