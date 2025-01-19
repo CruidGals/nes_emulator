@@ -88,7 +88,7 @@ namespace AddressingModeFuncs
      *  @param mode The mode that determines what addressing mode it utilizes
      *  @return The address given by the proceeding opcodes according to the given adressing mode
      */
-    uint8_t* offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    uint8_t& offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /**
      *  Finds and returns the program counter (pc) increment from the given mode
@@ -133,9 +133,9 @@ namespace Instructions
 
     /* ---------- Increment/Decrement Instructions ---------- */
 
-    void DEC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void DEC_INDEX(cpu6502 *const cpu, uint8_t& index);
     void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void INC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void INC_INDEX(cpu6502 *const cpu, uint8_t& index);
     void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
 
     /* ---------- Branch Instructions ---------- */

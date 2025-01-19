@@ -54,25 +54,23 @@ namespace AddressingModeFuncs
      *  Previous ex code:   case ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode)]
      *  New code:           case ABSOLUTE: cpu->memory.getBaseAddress() + AbsoluteOffset(opcode)
      */
-    uint8_t* offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
+    uint8_t& offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         switch (mode) {
-            case ACCUMULATOR: return &cpu->a;
-            case IMMEDIATE: return &opcode[1];
-            case ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode));
-            case ABSOLUTE_INDIRECT: return cpu->memory.getAbsoluteAddress(AbsoluteIndirectOffset(cpu, opcode));
-            case X_INDEXED_ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->x));
-            case Y_INDEXED_ABSOLUTE: return cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->y));
-            case ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode));
-            case X_INDEXED_ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->x));
-            case Y_INDEXED_ZERO_PAGE: return cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->y));
-            case X_INDEXED_ZERO_PAGE_INDIRECT: return cpu->memory.getAbsoluteAddress(XIndexZPIndirectOffset(cpu, opcode));
-            case ZERO_PAGE_INDIRECT_Y_INDEXED: return cpu->memory.getAbsoluteAddress(YIndexZPIndirectOffset(cpu, opcode));
+            case ACCUMULATOR: return cpu->a;
+            case IMMEDIATE: return opcode[1];
+            case ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode));
+            case ABSOLUTE_INDIRECT: return *cpu->memory.getAbsoluteAddress(AbsoluteIndirectOffset(cpu, opcode));
+            case X_INDEXED_ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->x));
+            case Y_INDEXED_ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->y));
+            case ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode));
+            case X_INDEXED_ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->x));
+            case Y_INDEXED_ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->y));
+            case X_INDEXED_ZERO_PAGE_INDIRECT: return *cpu->memory.getAbsoluteAddress(XIndexZPIndirectOffset(cpu, opcode));
+            case ZERO_PAGE_INDIRECT_Y_INDEXED: return *cpu->memory.getAbsoluteAddress(YIndexZPIndirectOffset(cpu, opcode));
                 
-            case RELATIVE: return &opcode[1];
-                
-            default:
-                return nullptr;
+            case RELATIVE: return opcode[1];
+            case IMPLIED: return opcode[1]; // Unused
         }
     }
 
@@ -146,7 +144,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int ORA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->a = *offsetByMode(cpu, opcode, mode) | cpu->a;
+        cpu->a = offsetByMode(cpu, opcode, mode) | cpu->a;
         bitwiseOpFlags(cpu, cpu->a);
         cpu->pc.val += pcByMode(mode);
         
@@ -155,7 +153,7 @@ namespace Instructions
 
     void BIT(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t offset = *offsetByMode(cpu, opcode, mode);
+        uint8_t offset = offsetByMode(cpu, opcode, mode);
         uint8_t result = cpu->a & offset;
         
         cpu->ps.v = (0x40 == (offset & 0x40));
@@ -167,7 +165,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int AND(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->a = *offsetByMode(cpu, opcode, mode) & cpu->a;
+        cpu->a = offsetByMode(cpu, opcode, mode) & cpu->a;
         bitwiseOpFlags(cpu, cpu->a);
         cpu->pc.val += pcByMode(mode);
         
@@ -177,7 +175,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int EOR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->a = *offsetByMode(cpu, opcode, mode) ^ cpu->a;
+        cpu->a = offsetByMode(cpu, opcode, mode) ^ cpu->a;
         bitwiseOpFlags(cpu, cpu->a);
         cpu->pc.val += pcByMode(mode);
         
@@ -188,30 +186,30 @@ namespace Instructions
 
     void ASL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* p = offsetByMode(cpu, opcode, mode);
+        uint8_t& p = offsetByMode(cpu, opcode, mode);
         
         //Set carry bit before lost
-        cpu->ps.c = 0x80 == (*p & 0x80);
+        cpu->ps.c = 0x80 == (p & 0x80);
         
-        *p = *p << 1;
+        p = p << 1;
         
         //Flags
-        cpu->ps.z = *p == 0x00;
-        cpu->ps.n = 0x80 == (*p & 0x80);
+        cpu->ps.z = p == 0x00;
+        cpu->ps.n = 0x80 == (p & 0x80);
         cpu->pc.val += pcByMode(mode);
     }
 
     void LSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* p = offsetByMode(cpu, opcode, mode);
+        uint8_t& p = offsetByMode(cpu, opcode, mode);
         
         //Set carry bit before lost
-        cpu->ps.c = 0x01 == (*p & 0x01);
+        cpu->ps.c = 0x01 == (p & 0x01);
         
-        *p = *p >> 1;
+        p = p >> 1;
         
         //Rest of Flags
-        cpu->ps.z = *p == 0x00;
+        cpu->ps.z = p == 0x00;
         cpu->ps.n = 0;
         cpu->pc.val += pcByMode(mode);
     }
@@ -222,16 +220,16 @@ namespace Instructions
      */
     void ROL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* offset = offsetByMode(cpu, opcode, mode);
-        uint8_t result = *offset << 1 | cpu->ps.c;
+        uint8_t& offset = offsetByMode(cpu, opcode, mode);
+        uint8_t result = offset << 1 | cpu->ps.c;
         
         //Set carry bit before lost
-        cpu->ps.c = 0x80 == (*offset & 0x80);
+        cpu->ps.c = 0x80 == (offset & 0x80);
         
-        *offset = result;
+        offset = result;
         
-        cpu->ps.z = *offset == 0x00;
-        cpu->ps.n = 0x80 == (*offset & 0x80);
+        cpu->ps.z = offset == 0x00;
+        cpu->ps.n = 0x80 == (offset & 0x80);
         cpu->pc.val += pcByMode(mode);
     }
 
@@ -241,15 +239,15 @@ namespace Instructions
      */
     void ROR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* offset = offsetByMode(cpu, opcode, mode);
-        uint8_t result = *offset >> 1 | cpu->ps.c << 7;
+        uint8_t& offset = offsetByMode(cpu, opcode, mode);
+        uint8_t result = offset >> 1 | cpu->ps.c << 7;
         
         //Set carry bit before lost by bit maneuver
-        cpu->ps.c = 0x01 == (*offset & 0x01);
+        cpu->ps.c = 0x01 == (offset & 0x01);
         
-        *offset = result;
-        cpu->ps.z = *offset == 0x00;
-        cpu->ps.n = 0x80 == (*offset & 0x80);
+        offset = result;
+        cpu->ps.z = offset == 0x00;
+        cpu->ps.n = 0x80 == (offset & 0x80);
         cpu->pc.val += pcByMode(mode);
     }
 
@@ -258,7 +256,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int ADC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t offset = *offsetByMode(cpu, opcode, mode);
+        uint8_t offset = offsetByMode(cpu, opcode, mode);
         uint16_t result = static_cast<uint16_t>(cpu->a) + static_cast<uint16_t>(offset) + cpu->ps.c;
         
         //Set overflow flag before cpu->a is updated
@@ -279,7 +277,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int SBC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t offset = *offsetByMode(cpu, opcode, mode);
+        uint8_t offset = offsetByMode(cpu, opcode, mode);
         uint16_t result = static_cast<uint16_t>(cpu->a) - static_cast<uint16_t>(offset) - (0x0001 - cpu->ps.c);
         
         //Set overflow flag before cpu->a is updated
@@ -303,7 +301,7 @@ namespace Instructions
      */
     int CMP_INDEX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode, const uint8_t index)
     {
-        uint8_t offset = *offsetByMode(cpu, opcode, mode);
+        uint8_t offset = offsetByMode(cpu, opcode, mode);
         uint8_t result = index - offset;
         
         //Flags
@@ -319,26 +317,26 @@ namespace Instructions
 
     void STA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        *offsetByMode(cpu, opcode, mode) = cpu->a;
+        offsetByMode(cpu, opcode, mode) = cpu->a;
         cpu->pc.val += pcByMode(mode);
     }
 
     void STX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        *offsetByMode(cpu, opcode, mode) = cpu->x;
+        offsetByMode(cpu, opcode, mode) = cpu->x;
         cpu->pc.val += pcByMode(mode);
     }
 
     void STY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        *offsetByMode(cpu, opcode, mode) = cpu->y;
+        offsetByMode(cpu, opcode, mode) = cpu->y;
         cpu->pc.val += pcByMode(mode);
     }
 
     //Returns extra cycle if page crossing detected
     int LDA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->a = *offsetByMode(cpu, opcode, mode);
+        cpu->a = offsetByMode(cpu, opcode, mode);
         bitwiseOpFlags(cpu, cpu->a);
         
         cpu->pc.val += pcByMode(mode);
@@ -349,7 +347,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int LDX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->x = *offsetByMode(cpu, opcode, mode);
+        cpu->x = offsetByMode(cpu, opcode, mode);
         bitwiseOpFlags(cpu, cpu->x);
         
         cpu->pc.val += pcByMode(mode);
@@ -360,7 +358,7 @@ namespace Instructions
     //Returns extra cycle if page crossing detected
     int LDY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        cpu->y = *offsetByMode(cpu, opcode, mode);
+        cpu->y = offsetByMode(cpu, opcode, mode);
         bitwiseOpFlags(cpu, cpu->y);
         
         cpu->pc.val += pcByMode(mode);
@@ -388,34 +386,34 @@ namespace Instructions
     /*
      Covers decrements instructions DEY and DEX
      */
-    void DEC_INDEX(cpu6502 *const cpu, uint8_t *const index)
+    void DEC_INDEX(cpu6502 *const cpu, uint8_t& index)
     {
-        (*index)--;
-        bitwiseOpFlags(cpu, *index);
+        index--;
+        bitwiseOpFlags(cpu, index);
     }
 
     void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* offset = offsetByMode(cpu, opcode, mode);
-        (*offset)--;
-        bitwiseOpFlags(cpu, *offset);
+        uint8_t& offset = offsetByMode(cpu, opcode, mode);
+        offset--;
+        bitwiseOpFlags(cpu, offset);
         cpu->pc.val += pcByMode(mode);
     }
 
     /*
      Covers decrements instructions INY and INX
      */
-    void INC_INDEX(cpu6502 *const cpu, uint8_t *const index)
+    void INC_INDEX(cpu6502 *const cpu, uint8_t& index)
     {
-        (*index)++;
-        bitwiseOpFlags(cpu, *index);
+        index++;
+        bitwiseOpFlags(cpu, index);
     }
 
     void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t* offset = offsetByMode(cpu, opcode, mode);
-        (*offset)++;
-        bitwiseOpFlags(cpu, *offset);
+        uint8_t offset = offsetByMode(cpu, opcode, mode);
+        offset++;
+        bitwiseOpFlags(cpu, offset);
         cpu->pc.val += pcByMode(mode);
     }
 
@@ -517,7 +515,7 @@ namespace Instructions
     void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         //In order to return correct address, subtract by cpu->memory to eliminate arbitrary memory placement
-        cpu->pc.val = static_cast<uint16_t>(offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
+        cpu->pc.val = static_cast<uint16_t>(&offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
     }
 
     void JSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
@@ -526,7 +524,7 @@ namespace Instructions
         cpu->pc.val++;
         
         //Gets correct address by subtracting where cpu->memory begins
-        uint16_t offset = (offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
+        uint16_t offset = (&offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
         
         //Load program counter onto stack
         cpu->memory[cpu->s] = static_cast<uint8_t>(cpu->pc.hi);
