@@ -15,6 +15,7 @@ class Memory
 {
     std::unique_ptr<uint8_t[]> m_data;
     
+private:
     /*
      *  Using a "Memory Proxy" class helps clearly split up the read/write operations to memory
      *  Allows handling of specific effects whilst reading and writing
@@ -75,7 +76,7 @@ public:
     
     uint8_t* getAbsoluteAddress(uint16_t address)
     {
-        return getBaseAddress() + address;
+        return getBaseAddress() + mirroredAddress(address);
     }
     
     /*
