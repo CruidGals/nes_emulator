@@ -57,19 +57,19 @@ namespace AddressingModeFuncs
     auto offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         switch (mode) {
-            case ACCUMULATOR: cpu->wrapper.pointTo(&cpu->a, false);
-            case ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode), true);
-            case ABSOLUTE_INDIRECT: cpu->wrapper.pointTo(AbsoluteIndirectOffset(cpu, opcode), true);
-            case X_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->x), true);
-            case Y_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->y), true);
-            case ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode), true);
-            case X_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->x), true);
-            case Y_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->y), true);
-            case X_INDEXED_ZERO_PAGE_INDIRECT: cpu->wrapper.pointTo(XIndexZPIndirectOffset(cpu, opcode), true);
-            case ZERO_PAGE_INDIRECT_Y_INDEXED: cpu->wrapper.pointTo(YIndexZPIndirectOffset(cpu, opcode), true);
+            case ACCUMULATOR: cpu->wrapper.pointTo(&cpu->a, false); break;
+            case ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode), true); break;
+            case ABSOLUTE_INDIRECT: cpu->wrapper.pointTo(AbsoluteIndirectOffset(cpu, opcode), true); break;
+            case X_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->x), true); break;
+            case Y_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->y), true); break;
+            case ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode), true); break;
+            case X_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->x), true); break;
+            case Y_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->y), true); break;
+            case X_INDEXED_ZERO_PAGE_INDIRECT: cpu->wrapper.pointTo(XIndexZPIndirectOffset(cpu, opcode), true); break;
+            case ZERO_PAGE_INDIRECT_Y_INDEXED: cpu->wrapper.pointTo(YIndexZPIndirectOffset(cpu, opcode), true); break;
                 
             default: // Covers Immediate, Relative, and Implied addressing modes
-                cpu->wrapper.pointTo(&opcode[1], false);
+                cpu->wrapper.pointTo(&opcode[1], false); break;
         }
         
         return cpu->wrapper;

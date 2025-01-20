@@ -135,9 +135,9 @@ namespace Instructions
 
     /* ---------- Increment/Decrement Instructions ---------- */
 
-    void DEC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void DEC_INDEX(cpu6502 *const cpu, uint8_t& index);
     void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
-    void INC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void INC_INDEX(cpu6502 *const cpu, uint8_t& index);
     void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /* ---------- Branch Instructions ---------- */

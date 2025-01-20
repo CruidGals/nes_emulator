@@ -395,7 +395,7 @@ int cpu6502::emulate()
             Instructions::STX(this, opcode, ZERO_PAGE);
             break;
         case 0x88: //DEY - Implied
-            Instructions::DEC_INDEX(this, &this->y);
+            Instructions::DEC_INDEX(this, this->y);
             break;
         case 0x8a: //TXA - Implied
             Instructions::TRANSFER(this, this->x, &this->a);
@@ -521,13 +521,13 @@ int cpu6502::emulate()
             Instructions::DEC(this, opcode, ZERO_PAGE);
             break;
         case 0xc8: //INY - Implied
-            Instructions::INC_INDEX(this, &this->y);
+            Instructions::INC_INDEX(this, this->y);
             break;
         case 0xc9: //CMP - Immediate
             Instructions::CMP_INDEX(this, opcode, IMMEDIATE, this->a);
             break;
         case 0xca: //DEX - Implied
-            Instructions::DEC_INDEX(this, &this->x);
+            Instructions::DEC_INDEX(this, this->x);
             break;
         case 0xcc: //CPY - Absolute
             Instructions::CMP_INDEX(this, opcode, ABSOLUTE, this->y);
@@ -578,7 +578,8 @@ int cpu6502::emulate()
             Instructions::INC(this, opcode, ZERO_PAGE);
             break;
         case 0xe8: //INX
-            Instructions::INC_INDEX(this, &this->x);
+            Instructions::INC_INDEX(this, this->x);
+            Instructions::INC_INDEX(this, this->x);
             break;
         case 0xe9: //SBC - Immediate
             Instructions::SBC(this, opcode, IMMEDIATE);

@@ -148,6 +148,8 @@ public:
      *  - Otherwise, coarse Y is set incremented.
      */
     void fineYIncrement();
+    
+    void debug() const;
 };
 
 #endif /* PPU_hpp */

@@ -292,21 +292,21 @@ void drawMario(GUI* gui)
 
 int main(int argc, const char * argv[]) 
 {
-    /*
+    
     PPUMemory* ppuMem = new PPUMemory(NametableMirroring::NONE);
     PPU* ppu = new PPU(*ppuMem);
     CPUMemory* cpuMem = new CPUMemory(ppu);
     cpu6502* cpu = new cpu6502(*cpuMem);
     
     uint8_t program[] = {
-        0xA9, 0x00,        // LDA #$00
-        0x8D, 0x00, 0x02,  // STA $0200
-        0xEE, 0x00, 0x02,  // INC $0200
-        0xAD, 0x00, 0x02,  // LDA $0200
-        0x4C, 0x05, 0x02   // JMP LOOP (to $0203)
+        0xAD, 0x02, 0x20,  // LDA $2002 (Read PPU Status to clear w toggle)
+        0xA9, 0x20,        // LDA #$20 (Load high byte of PPU address into accumulator)
+        0x8D, 0x06, 0x20,  // STA $2006 (Write high byte to PPU Address Register)
+        0xA9, 0x06,        // LDA #$06 (Load low byte of PPU address into accumulator)
+        0x8D, 0x06, 0x20   // STA $2006 (Write low byte to PPU Address Register)
     };
     
-    uint16_t counter { 0x200 };
+    uint16_t counter { 0 };
     
     for (auto const opcode : program)
     {
@@ -316,21 +316,21 @@ int main(int argc, const char * argv[])
     
     //std::string filepath = "./roms/Donkey Kong (Japan).nes";
     //readFile(cpu, filepath, 0x8000);
-    cpu->pc.val = 0x200;
+    cpu->pc.val = 0;
     int cycles = 0;
     
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 5; i++)
     {
         cycles += cpu->emulate();
     }
     
-    std::cout << cycles << std::endl;
+    std::cout << std::hex << static_cast<int>(cpu->memory[0x2006]) << std::dec << "\n";
+    ppu->debug();
     
     delete cpu;
     delete cpuMem;
     delete ppu;
     delete ppuMem;
-    */
     
     /*
     GUI game;
@@ -343,7 +343,10 @@ int main(int argc, const char * argv[])
     }
     */
     
-    Loader loader("/Users/kylechiem/Documents/VSCode Projects/c++/xcodejawn/emulator_6502/emulator_6502/roms/Donkey Kong (Japan).nes");
+    /*
+    Loader loader = Loader();
+    loader.loadRom("/Users/kylechiem/Documents/VSCode Projects/c++/xcodejawn/emulator_6502/emulator_6502/roms/Donkey Kong (Japan).nes");
+     */
     
     
     

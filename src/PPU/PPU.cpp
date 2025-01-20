@@ -177,3 +177,8 @@ void PPU::fineYIncrement()
         m_intRegs.v.coarseY++;      // Act as normal overflow
     }
 }
+
+void PPU::debug() const
+{
+    std::cout << std::hex << static_cast<int>(m_intRegs.v.val) << std::dec << "\n";
+}
