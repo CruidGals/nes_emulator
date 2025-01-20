@@ -136,7 +136,9 @@ int cpu6502::emulate()
 {
     using namespace AddressingModeFuncs;
     
-    uint8_t *opcode = &this->memory.read(this->pc.val);
+    // No need to use memory.read() function: reading opcode from pc doesn't produce side effects
+    uint8_t *opcode = &this->memory[this->pc.val];
+    
     //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(this->pc.val) << std::endl;
     this->pc.val += 1;
     
