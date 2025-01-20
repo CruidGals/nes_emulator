@@ -11,25 +11,26 @@
 #include <stdio.h>
 #include "6502emu.hpp"
 
+// Enum listing all the different addressing modes given by 6502 cpu
+enum AddressingMode {
+    IMPLIED,
+    ACCUMULATOR,                    //A
+    IMMEDIATE,                      //#$nn
+    ABSOLUTE,                       //$nnnn
+    X_INDEXED_ABSOLUTE,             //$nnnn, X
+    Y_INDEXED_ABSOLUTE,             //$nnnn, Y
+    ABSOLUTE_INDIRECT,              //($nnnn)
+    ZERO_PAGE,                      //$nn
+    X_INDEXED_ZERO_PAGE,            //$nn,X
+    Y_INDEXED_ZERO_PAGE,            //$nn,Y
+    X_INDEXED_ZERO_PAGE_INDIRECT,   //($nn,X)
+    ZERO_PAGE_INDIRECT_Y_INDEXED,   //($nn),Y
+    RELATIVE                        //$nnnn
+};
+
 namespace AddressingModeFuncs
 {
-    // Enum listing all the different addressing modes given by 6502 cpu
-    enum AddressingMode {
-        IMPLIED,
-        ACCUMULATOR,                    //A
-        IMMEDIATE,                      //#$nn
-        ABSOLUTE,                       //$nnnn
-        X_INDEXED_ABSOLUTE,             //$nnnn, X
-        Y_INDEXED_ABSOLUTE,             //$nnnn, Y
-        ABSOLUTE_INDIRECT,              //($nnnn)
-        ZERO_PAGE,                      //$nn
-        X_INDEXED_ZERO_PAGE,            //$nn,X
-        Y_INDEXED_ZERO_PAGE,            //$nn,Y
-        X_INDEXED_ZERO_PAGE_INDIRECT,   //($nn,X)
-        ZERO_PAGE_INDIRECT_Y_INDEXED,   //($nn),Y
-        RELATIVE                        //$nnnn
-    };
-    
+
     /* ---------- Address getters for addressing modes ---------- */
     // For more information about what each mode does, consult https://www.pagetable.com/c64ref/6502/
 
@@ -83,12 +84,13 @@ namespace AddressingModeFuncs
     /**
      *  A general function that retrieves the offset (address) according to given addressing rule.
      *
+     *  Important to note that this function DOES NOT SUPPORT ACCUMULATOR ADDRESSING MODE. Passing it in will lead to undefined behavior.
+     *
      *  @param cpu A reference to the 6502 cpu. Used to access the internal memory and retrieve the correct address
      *  @param opcode A reference to the program counter whose position is set at the current opcode being ran.
-     *  @param mode The mode that determines what addressing mode it utilizes
-     *  @return The address given by the proceeding opcodes according to the given adressing mode
+     *  @param mode The mode that determines what addressing mode it utilizes.
      */
-    uint8_t& offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    auto offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /**
      *  Finds and returns the program counter (pc) increment from the given mode
@@ -104,39 +106,39 @@ namespace Instructions
 {
     /* ---------- Logic Instructions ---------- */
 
-    int ORA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void BIT(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int AND(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int EOR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+    int ORA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void BIT(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int AND(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int EOR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /* ---------- Shift (bit) Instructions ---------- */
 
-    void ASL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void LSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void ROL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void ROR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+    void ASL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void LSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void ROL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void ROR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /* ---------- Arithmetic Instructions ---------- */
 
-    int ADC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int SBC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int CMP_INDEX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode, const uint8_t index);
+    int ADC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int SBC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int CMP_INDEX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode, const uint8_t index);
 
     /* ---------- Store/Load Instructions ---------- */
 
-    void STA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void STX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void STY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int LDA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int LDX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    int LDY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+    void STA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void STX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void STY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int LDA(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int LDX(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    int LDY(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /* ---------- Increment/Decrement Instructions ---------- */
 
-    void DEC_INDEX(cpu6502 *const cpu, uint8_t& index);
-    void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void INC_INDEX(cpu6502 *const cpu, uint8_t& index);
-    void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+    void DEC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void INC_INDEX(cpu6502 *const cpu, uint8_t *const index);
+    void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
     /* ---------- Branch Instructions ---------- */
 
@@ -167,12 +169,12 @@ namespace Instructions
     // BRK instruction handled in cpu6502::interrupt_handler()
     void RTI(cpu6502 *const cpu);
     void RTS(cpu6502 *const cpu);
-    void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
-    void JSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+    void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
+    void JSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 }
 
 /* ---------- Helper Functions ---------- */
-int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode);
+int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode);
 
 /* ---------- Flag functions ---------- */
 void bitwiseOpFlags(cpu6502 *const cpu, uint8_t comp);

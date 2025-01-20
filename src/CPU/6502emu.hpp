@@ -23,6 +23,27 @@ enum class InterruptType { BRK, IRQ, RESET, NMI };
  */
 class cpu6502 {
     
+    /// Wrapper class to control how memory in the cpu is read/written
+    class MemWrapper
+    {
+        Memory& memory;
+        std::variant<uint8_t*, uint16_t> m_val;
+        bool m_accessesMem;
+        
+    public:
+        
+        MemWrapper(Memory& mem, uint8_t* val, bool accessesMem);
+        
+        /// Point to a new value to wrap
+        void pointTo(std::variant<uint8_t*, uint16_t>, bool accessesMem);
+        
+        /// If the piece of memory accesses memory
+        const uint16_t getAddress() const;
+        
+        operator uint8_t() const;
+        MemWrapper& operator=(uint8_t value);
+    };
+    
 public:
     uint8_t a;  //Accumulator
     uint8_t x;  //X index register
@@ -30,6 +51,7 @@ public:
     uint8_t s;  //Stack pointer
     
     Memory& memory; // Memory
+    MemWrapper wrapper; // Wrapper for reading/writing memory
     
     union //Program counter
     {

@@ -13,9 +13,53 @@
 #include <iostream>
 #include <stdint.h>
 
+/* ---------- MemWrapper IMPLEMENTATION ---------- */
+cpu6502::MemWrapper::MemWrapper(Memory& mem, uint8_t* val, bool accessesMem) : memory(mem), m_val(val), m_accessesMem(accessesMem) {}
+
+void cpu6502::MemWrapper::pointTo(std::variant<uint8_t*, uint16_t> newVal, bool accessesMem)
+{
+    m_val = newVal;
+    m_accessesMem = accessesMem;
+}
+
+cpu6502::MemWrapper::operator uint8_t() const
+{
+    if (m_accessesMem) // Wrapper that access mem will always contain a uint16_t in m_val
+        return memory.read(std::get<uint16_t>(m_val));
+    else    // Wrapper that doesn't access mem will always contain a uint8_t* in m_val
+        return (std::get<uint8_t*>(m_val) != nullptr) ? *std::get<uint8_t*>(m_val) : 0;
+}
+
+cpu6502::MemWrapper& cpu6502::MemWrapper::operator=(uint8_t val)
+{
+    
+    if (m_accessesMem) // Wrapper that access mem will always contain a uint16_t in m_val
+        memory.write(std::get<uint16_t>(m_val), val);
+    else    // Wrapper that doesn't access mem will always contain a uint8_t* in m_val
+    {
+        if (std::get<uint8_t*>(m_val) != nullptr)
+        {
+            *std::get<uint8_t*>(m_val) = val;
+        }
+    }
+    
+    return *this;
+}
+
+const uint16_t cpu6502::MemWrapper::getAddress() const
+{
+    if (m_accessesMem)
+    {
+        return std::get<uint16_t>(m_val);
+    }
+    
+    std::cerr << "Tried accessing uint8_t* rather than uint16_t.\n";
+    return 0;
+}
+
 /* ---------- CPU IMPLEMENTATION ---------- */
 
-cpu6502::cpu6502(Memory& mem) : memory(mem)
+cpu6502::cpu6502(Memory& mem) : memory(mem), wrapper(mem, nullptr, false)
 {
     ps.i = 1;
     ps._ = 1;
@@ -92,7 +136,7 @@ int cpu6502::emulate()
 {
     using namespace AddressingModeFuncs;
     
-    uint8_t *opcode = this->memory.getBaseAddress() + this->pc.val;
+    uint8_t *opcode = &this->memory.read(this->pc.val);
     //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(this->pc.val) << std::endl;
     this->pc.val += 1;
     
@@ -349,7 +393,7 @@ int cpu6502::emulate()
             Instructions::STX(this, opcode, ZERO_PAGE);
             break;
         case 0x88: //DEY - Implied
-            Instructions::DEC_INDEX(this, this->y);
+            Instructions::DEC_INDEX(this, &this->y);
             break;
         case 0x8a: //TXA - Implied
             Instructions::TRANSFER(this, this->x, &this->a);
@@ -475,13 +519,13 @@ int cpu6502::emulate()
             Instructions::DEC(this, opcode, ZERO_PAGE);
             break;
         case 0xc8: //INY - Implied
-            Instructions::INC_INDEX(this, this->y);
+            Instructions::INC_INDEX(this, &this->y);
             break;
         case 0xc9: //CMP - Immediate
             Instructions::CMP_INDEX(this, opcode, IMMEDIATE, this->a);
             break;
         case 0xca: //DEX - Implied
-            Instructions::DEC_INDEX(this, this->x);
+            Instructions::DEC_INDEX(this, &this->x);
             break;
         case 0xcc: //CPY - Absolute
             Instructions::CMP_INDEX(this, opcode, ABSOLUTE, this->y);
@@ -532,7 +576,7 @@ int cpu6502::emulate()
             Instructions::INC(this, opcode, ZERO_PAGE);
             break;
         case 0xe8: //INX
-            Instructions::INC_INDEX(this, this->x);
+            Instructions::INC_INDEX(this, &this->x);
             break;
         case 0xe9: //SBC - Immediate
             Instructions::SBC(this, opcode, IMMEDIATE);

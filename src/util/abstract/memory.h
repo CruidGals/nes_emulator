@@ -15,53 +15,11 @@ class Memory
 {
     std::unique_ptr<uint8_t[]> m_data;
     
-private:
-    /*
-     *  Using a "Memory Proxy" class helps clearly split up the read/write operations to memory
-     *  Allows handling of specific effects whilst reading and writing
-     */
-    class MemProxy
-    {
-        Memory& memory;
-        uint16_t address;
-        
-    public:
-        MemProxy(Memory& mem, uint16_t addr) : memory(mem), address(addr) {}
-        
-        /**
-         *  Isolates the read operation into memory.
-         *
-         *  @return Value read when accessing address in memory
-         */
-        operator uint8_t() const
-        {
-            return memory.read(address);
-        }
-        
-        /**
-         *  Isolates the write operation into memory.
-         *
-         *  @param value Value to be pushed into memory
-         *  @return Reference of the Proxy class. Allows for complex assignment semantic features to exist
-         */
-        MemProxy& operator=(uint8_t value)
-        {
-            memory.write(address, value);
-            return *this;
-        }
-    };
-    
 public:
     Memory(uint16_t size) : m_data(std::make_unique<uint8_t[]>(size)) {}
-    
-    // Access operator
-    MemProxy operator[](uint16_t address)
-    {
-        return MemProxy(*this, address);
-    }
 
-    // Const access operator
-    const uint8_t& operator[](uint16_t address) const
+    // Access operator
+    uint8_t& operator[](uint16_t address)
     {
         return m_data[mirroredAddress(address)];
     }

@@ -54,24 +54,25 @@ namespace AddressingModeFuncs
      *  Previous ex code:   case ABSOLUTE: return &cpu->memory[AbsoluteOffset(opcode)]
      *  New code:           case ABSOLUTE: cpu->memory.getBaseAddress() + AbsoluteOffset(opcode)
      */
-    uint8_t& offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
+    auto offsetByMode(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         switch (mode) {
-            case ACCUMULATOR: return cpu->a;
-            case IMMEDIATE: return opcode[1];
-            case ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode));
-            case ABSOLUTE_INDIRECT: return *cpu->memory.getAbsoluteAddress(AbsoluteIndirectOffset(cpu, opcode));
-            case X_INDEXED_ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->x));
-            case Y_INDEXED_ABSOLUTE: return *cpu->memory.getAbsoluteAddress(AbsoluteOffset(opcode, cpu->y));
-            case ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode));
-            case X_INDEXED_ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->x));
-            case Y_INDEXED_ZERO_PAGE: return *cpu->memory.getAbsoluteAddress(ZPOffset(opcode, cpu->y));
-            case X_INDEXED_ZERO_PAGE_INDIRECT: return *cpu->memory.getAbsoluteAddress(XIndexZPIndirectOffset(cpu, opcode));
-            case ZERO_PAGE_INDIRECT_Y_INDEXED: return *cpu->memory.getAbsoluteAddress(YIndexZPIndirectOffset(cpu, opcode));
+            case ACCUMULATOR: cpu->wrapper.pointTo(&cpu->a, false);
+            case ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode), true);
+            case ABSOLUTE_INDIRECT: cpu->wrapper.pointTo(AbsoluteIndirectOffset(cpu, opcode), true);
+            case X_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->x), true);
+            case Y_INDEXED_ABSOLUTE: cpu->wrapper.pointTo(AbsoluteOffset(opcode, cpu->y), true);
+            case ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode), true);
+            case X_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->x), true);
+            case Y_INDEXED_ZERO_PAGE: cpu->wrapper.pointTo(ZPOffset(opcode, cpu->y), true);
+            case X_INDEXED_ZERO_PAGE_INDIRECT: cpu->wrapper.pointTo(XIndexZPIndirectOffset(cpu, opcode), true);
+            case ZERO_PAGE_INDIRECT_Y_INDEXED: cpu->wrapper.pointTo(YIndexZPIndirectOffset(cpu, opcode), true);
                 
-            case RELATIVE: return opcode[1];
-            case IMPLIED: return opcode[1]; // Unused
+            default: // Covers Immediate, Relative, and Implied addressing modes
+                cpu->wrapper.pointTo(&opcode[1], false);
         }
+        
+        return cpu->wrapper;
     }
 
     //Returns the program counter increment for each mode
@@ -98,7 +99,7 @@ namespace AddressingModeFuncs
 
 /* ---------- Helper Functions ---------- */
 
-int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingModeFuncs::AddressingMode mode)
+int detectPageCross(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
 {
     using namespace AddressingModeFuncs;
     
@@ -186,7 +187,7 @@ namespace Instructions
 
     void ASL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t& p = offsetByMode(cpu, opcode, mode);
+        auto p = offsetByMode(cpu, opcode, mode);
         
         //Set carry bit before lost
         cpu->ps.c = 0x80 == (p & 0x80);
@@ -201,7 +202,7 @@ namespace Instructions
 
     void LSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t& p = offsetByMode(cpu, opcode, mode);
+        auto p = offsetByMode(cpu, opcode, mode);
         
         //Set carry bit before lost
         cpu->ps.c = 0x01 == (p & 0x01);
@@ -220,7 +221,7 @@ namespace Instructions
      */
     void ROL(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t& offset = offsetByMode(cpu, opcode, mode);
+        auto offset = offsetByMode(cpu, opcode, mode);
         uint8_t result = offset << 1 | cpu->ps.c;
         
         //Set carry bit before lost
@@ -239,7 +240,7 @@ namespace Instructions
      */
     void ROR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t& offset = offsetByMode(cpu, opcode, mode);
+        auto offset = offsetByMode(cpu, opcode, mode);
         uint8_t result = offset >> 1 | cpu->ps.c << 7;
         
         //Set carry bit before lost by bit maneuver
@@ -394,8 +395,8 @@ namespace Instructions
 
     void DEC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t& offset = offsetByMode(cpu, opcode, mode);
-        offset--;
+        auto offset = offsetByMode(cpu, opcode, mode);
+        offset = offset - 1;
         bitwiseOpFlags(cpu, offset);
         cpu->pc.val += pcByMode(mode);
     }
@@ -411,8 +412,8 @@ namespace Instructions
 
     void INC(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
-        uint8_t offset = offsetByMode(cpu, opcode, mode);
-        offset++;
+        auto offset = offsetByMode(cpu, opcode, mode);
+        offset = offset + 1;
         bitwiseOpFlags(cpu, offset);
         cpu->pc.val += pcByMode(mode);
     }
@@ -515,7 +516,7 @@ namespace Instructions
     void JMP(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
     {
         //In order to return correct address, subtract by cpu->memory to eliminate arbitrary memory placement
-        cpu->pc.val = static_cast<uint16_t>(&offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
+        cpu->pc.val = static_cast<uint16_t>(offsetByMode(cpu, opcode, mode).getAddress());
     }
 
     void JSR(cpu6502 *const cpu, uint8_t *const opcode, const AddressingMode mode)
@@ -524,7 +525,7 @@ namespace Instructions
         cpu->pc.val++;
         
         //Gets correct address by subtracting where cpu->memory begins
-        uint16_t offset = (&offsetByMode(cpu, opcode, mode) - cpu->memory.getBaseAddress());
+        uint16_t offset = (offsetByMode(cpu, opcode, mode).getAddress());
         
         //Load program counter onto stack
         cpu->memory[cpu->s] = static_cast<uint8_t>(cpu->pc.hi);
