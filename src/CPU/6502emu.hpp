@@ -51,7 +51,7 @@ public:
     uint8_t s;  //Stack pointer
     
     Memory& memory; // Memory
-    MemWrapper wrapper; // Wrapper for reading/writing memory
+    MemWrapper wrapper; // Wrapper for controlling the reading/writing of memory
     
     union //Program counter
     {

@@ -443,9 +443,11 @@ namespace Instructions
             //New pc high bytes don't match, means page crossed
             if (prev_high != new_high) ++cycles;
         }
-        
-        //Branch functions itself take 2 bytes
-        *pc += pcByMode(RELATIVE);
+        else
+        {
+            //Branch functions itself take 2 bytes
+            *pc += pcByMode(RELATIVE);
+        }
         
         return cycles;
     }

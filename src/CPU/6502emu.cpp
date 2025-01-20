@@ -139,7 +139,7 @@ int cpu6502::emulate()
     // No need to use memory.read() function: reading opcode from pc doesn't produce side effects
     uint8_t *opcode = &this->memory[this->pc.val];
     
-    //std::cout << "Opcode: " << std::hex << static_cast<int>(*opcode) << std::dec << " PC: " << static_cast<int>(this->pc.val) << std::endl;
+    std::cout << "PC: " << std::hex <<  static_cast<int>(this->pc.val) << std::dec;
     this->pc.val += 1;
     
     //Instruction cycles given no page is crossed or branch is taken, as those events increase cycles by one
@@ -621,8 +621,8 @@ int cpu6502::emulate()
             break;
     }
     
-    std::cout << "A: " << static_cast<int>(this->a) << " X: " << static_cast<int>(this->x) << " Y: " << static_cast<int>(this->y) << " S: " << static_cast<int>(this->s) << std::endl;
-    std::cout << "C: " << static_cast<int>(this->ps.c) << " Z: " << static_cast<int>(this->ps.z) << " I: " << static_cast<int>(this->ps.i) << " D: " << static_cast<int>(this->ps.d) << " B: " << static_cast<int>(this->ps.b) << " V:" << static_cast<int>(this->ps.v) << " N: " << static_cast<int>(this->ps.n) << std::endl;
+    std::cout << " A: " << static_cast<int>(this->a) << " X: " << static_cast<int>(this->x) << " Y: " << static_cast<int>(this->y) << " S: " << static_cast<int>(this->s) << std::endl;
+    std::cout << "C: " << static_cast<int>(this->ps.c) << " Z: " << static_cast<int>(this->ps.z) << " I: " << static_cast<int>(this->ps.i) << " D: " << static_cast<int>(this->ps.d) << " B: " << static_cast<int>(this->ps.b) << " V: " << static_cast<int>(this->ps.v) << " N: " << static_cast<int>(this->ps.n) << std::endl;
     
     
     return cycles;
