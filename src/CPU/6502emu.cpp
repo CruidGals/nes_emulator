@@ -579,7 +579,6 @@ int cpu6502::emulate()
             break;
         case 0xe8: //INX
             Instructions::INC_INDEX(this, this->x);
-            Instructions::INC_INDEX(this, this->x);
             break;
         case 0xe9: //SBC - Immediate
             Instructions::SBC(this, opcode, IMMEDIATE);
