@@ -139,7 +139,9 @@ int cpu6502::emulate()
     // No need to use memory.read() function: reading opcode from pc doesn't produce side effects
     uint8_t *opcode = &this->memory[this->pc.val];
     
-    std::cout << "PC: " << std::hex <<  static_cast<int>(this->pc.val) << std::dec;
+    std::cout << "PC: " << std::hex << static_cast<int>(this->pc.val) << std::dec <<
+                " OP: " << std::hex << static_cast<int>(*opcode) << std::dec;
+    
     this->pc.val += 1;
     
     //Instruction cycles given no page is crossed or branch is taken, as those events increase cycles by one

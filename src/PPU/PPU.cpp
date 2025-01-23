@@ -11,7 +11,10 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU(Memory& mem) : memory(mem), palette("../../res/Composite_wiki.pal") {}
+PPU::PPU(Memory& mem) : memory(mem), palette("../../res/Composite_wiki.pal")
+{
+    powerResetState(false);
+}
 
 //Power up function
 void PPU::powerResetState(bool isReset)
@@ -45,6 +48,7 @@ uint8_t PPU::read(uint16_t addr)
             return m_regs.OAMDATA;
             break;
         case 0x2007: // PPUDATA
+            // TODO: Implement the read buffer mechanism
             return memory[m_intRegs.v.val];
             break;
         
@@ -180,5 +184,8 @@ void PPU::fineYIncrement()
 
 void PPU::debug() const
 {
-    std::cout << std::hex << static_cast<int>(m_intRegs.v.val) << std::dec << "\n";
+    std::cout << "v: " << std::hex << static_cast<int>(m_intRegs.v.val) << std::dec <<
+                " t: " << std::hex << static_cast<int>(m_intRegs.t.val) << std::dec <<
+                " x: " << std::hex << static_cast<int>(m_intRegs.x) << std::dec <<
+                " w: " << std::hex << static_cast<int>(m_intRegs.w) << std::dec << "\n";
 }

@@ -292,6 +292,14 @@ void drawMario(GUI* gui)
 
 int main(int argc, const char * argv[]) 
 {
+    GUI game;
+    drawMario(&game);
+
+    while (game.running())
+    {
+        game.update();
+        game.render();
+    }
     
     PPUMemory* ppuMem = new PPUMemory(NametableMirroring::NONE);
     PPU* ppu = new PPU(*ppuMem);
@@ -302,8 +310,19 @@ int main(int argc, const char * argv[])
         0xAD, 0x02, 0x20,  // LDA $2002 (Read PPU Status to clear w toggle)
         0xA9, 0x20,        // LDA #$20 (Load high byte of PPU address into accumulator)
         0x8D, 0x06, 0x20,  // STA $2006 (Write high byte to PPU Address Register)
-        0xA9, 0x06,        // LDA #$06 (Load low byte of PPU address into accumulator)
-        0x8D, 0x06, 0x20   // STA $2006 (Write low byte to PPU Address Register)
+        0xA9, 0x00,        // LDA #$06 (Load low byte of PPU address into accumulator)
+        0x8D, 0x06, 0x20,   // STA $2006 (Write low byte to PPU Address Register)
+        
+        0xA2, 0x00,        // LDX #$00       (Initialize X to 0)
+        0xA0, 0x00,        // LDY #$00       (Initialize Y to 0)
+        0xA9, 0x24,        // LDA #$24       (Load value to write to PPUDATA)
+        0x8D, 0x07, 0x20,  // STA $2007      (Write value in A to PPUDATA)
+        0xC8,              // INY            (Increment Y)
+        0xC0, 0x1E,        // CPY #$1E       (Compare Y with 30)
+        0xD0, 0xF9,        // BNE -9         (Branch to STA $2007 if Y < 30)
+        0xE8,              // INX            (Increment X)
+        0xE0, 0x20,        // CPX #$20       (Compare X with 32)
+        0xD0, 0xEF         // BNE -17        (Branch to LDY #$00 if X < 32)
     };
     
     uint16_t counter { 0 };
@@ -319,7 +338,7 @@ int main(int argc, const char * argv[])
     cpu->pc.val = 0;
     int cycles = 0;
     
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < (6 + 6 * 32 + 4 * (960)); i++)
     {
         cycles += cpu->emulate();
     }
@@ -331,17 +350,6 @@ int main(int argc, const char * argv[])
     delete cpuMem;
     delete ppu;
     delete ppuMem;
-    
-    /*
-    GUI game;
-    drawMario(&game);
-
-    while (game.running())
-    {
-        game.update();
-        game.render();
-    }
-    */
     
     /*
     Loader loader = Loader();
