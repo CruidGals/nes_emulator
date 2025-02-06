@@ -15,6 +15,7 @@
 // LIB includes
 #include "../util/ppumem.hpp"
 #include "palette.hpp"
+#include "../screen/gui.hpp"
 
 namespace Registers
 {
@@ -101,6 +102,11 @@ struct Internal
 
 } // namespace Registers
 
+struct Sprite 
+{
+    
+};
+
 class PPU
 {
     // Internal color palette
@@ -110,6 +116,9 @@ class PPU
     struct Registers::CPUMapped m_regs; // Completely remove this later
     struct Registers::Internal m_intRegs;
     
+    // Include reference to GUI for rendering
+    GUI* gui;
+    
     Memory& memory;
     
 public:
@@ -117,7 +126,7 @@ public:
     uint8_t cpuDataBus;
     
     //Constructors Destructors
-    PPU(Memory& mem);
+    PPU(Memory& mem, GUI* gui);
     
     /*
      Power/Reset function for PPU
@@ -149,6 +158,12 @@ public:
      */
     void fineYIncrement();
     
+    /* ----- RENDERING FUNCTIONS ----- */
+    void drawSprite() const;
+    void drawScreen() const;
+    
+    /* ----- DEBUG FUNCTIONS ----- */
+    void updateScreen() const;
     void debug() const;
 };
 

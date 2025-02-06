@@ -16,7 +16,7 @@ class Memory
     std::unique_ptr<uint8_t[]> m_data;
     
 public:
-    Memory(uint16_t size) : m_data(std::make_unique<uint8_t[]>(size)) {}
+    Memory(uint16_t size) : m_data(new uint8_t[size]()) {}
 
     // Access operator
     uint8_t& operator[](uint16_t address)

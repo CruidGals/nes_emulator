@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 
-PPU::PPU(Memory& mem) : memory(mem), palette("../../res/Composite_wiki.pal")
+PPU::PPU(Memory& mem, GUI* gui) : memory(mem), gui(gui), palette("../../res/Composite_wiki.pal")
 {
     powerResetState(false);
 }
@@ -179,6 +179,18 @@ void PPU::fineYIncrement()
     else
     {
         m_intRegs.v.coarseY++;      // Act as normal overflow
+    }
+}
+
+void PPU::updateScreen() const
+{
+    // Draw each tile individually
+    for (int m = 0; m < 32; ++m)
+    {
+        for (int n = 0; n < 30; ++n)
+        {
+            uint8_t tile = memory[0x2000 + ]
+        }
     }
 }
 

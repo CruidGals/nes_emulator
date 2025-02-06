@@ -50,4 +50,7 @@ public:
     // Draws and gets pixels from m_pixelRepr
     void drawPixel(int x, int y, struct Pixel color);
     Pixel getPixel(int x, int y) const;
+    
+    // Other helper functions
+    const bool inBounds(int x, int y) const;
 };

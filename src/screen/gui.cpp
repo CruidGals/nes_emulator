@@ -80,10 +80,25 @@ void GUI::updateNametable()
  */
 void GUI::drawPixel(int x, int y, struct Pixel color)
 {
+    if (!inBounds(x, y))
+    {
+        std::cerr << "Tried accessing memory that is out of bounds.\n";
+    }
+    
     m_pixelRepr[(256 * y) + x] = color;
 }
 
 Pixel GUI::getPixel(int x, int y) const
 {
+    if (!inBounds(x, y))
+    {
+        std::cerr << "Tried accessing memory that is out of bounds.\n";
+    }
+    
     return m_pixelRepr[(256 * y) + x];
+}
+
+const bool GUI::inBounds(int x, int y) const
+{
+    return ((x >= 0) && (x < 256)) && ((y >= 0) && (y < 240));
 }

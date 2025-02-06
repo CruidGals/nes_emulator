@@ -292,17 +292,17 @@ void drawMario(GUI* gui)
 
 int main(int argc, const char * argv[]) 
 {
-    GUI game;
-    drawMario(&game);
+    GUI* game = new GUI();
+    //drawMario(game);
 
-    while (game.running())
+    while (game->running())
     {
-        game.update();
-        game.render();
+        game->update();
+        game->render();
     }
     
     PPUMemory* ppuMem = new PPUMemory(NametableMirroring::NONE);
-    PPU* ppu = new PPU(*ppuMem);
+    PPU* ppu = new PPU(*ppuMem, game);
     CPUMemory* cpuMem = new CPUMemory(ppu);
     cpu6502* cpu = new cpu6502(*cpuMem);
     
@@ -348,6 +348,7 @@ int main(int argc, const char * argv[])
     
     delete cpu;
     delete cpuMem;
+    delete game;
     delete ppu;
     delete ppuMem;
     
